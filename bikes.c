@@ -188,19 +188,19 @@ size_t getRealDim(bikeADT bike){
     return bike->dim_station;
 }
 
-size_t getMemberTrips(bikeADT bike, int pos){
+size_t getMemberTrips(bikeADT bike, size_t pos){
     return bike->station[pos].memberTrips;
 }
 
-size_t getCausalTrips(bikeADT bike, int pos){
+size_t getCausalTrips(bikeADT bike, size_t pos){
     return bike->station[pos].casualTrips;
 }
 
-size_t getAllTrips(bikeADT bike, int pos){
+size_t getAllTrips(bikeADT bike, size_t pos){
     return bike->station[pos].allTrips;
 }
 
-char * getStationName(bikeADT bike, int pos){
+char * getStationName(bikeADT bike, size_t pos){
     return copyStr(bike->station[pos].nameStation);
 }
 
@@ -222,7 +222,25 @@ void tripSort(bikeADT bike){
     bike->station = realloc(bike->station, k * sizeof(TVecStation)); //Con este realloc eliminamos del vector todas las estaciones que tengan el used en 0.
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare);
 }
+
 /*query 2*/
+
+//para el nombre hacemos un for con el getStationName y getDim y desp usamos las dos funciones de abajo
+
+ //devuelve idx de oldest id entonces desp lo buscamos con getStationName
+size_t getOldestRoute(bikeADT bike, size_t pos){
+    return bike->station[pos].oldest.oldestStationId;
+}
+
+char * getOldestDateTime(bikeADT bike, size_t pos){//devuelve el oldest Date time 
+    return copyStr(bike->station[pos].oldest.oldestDateTime);
+}
+
+
+// Ordena el vector por orden alfabetico
+void sortAlpha(bikeADT bike){
+    qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
+}
 
 /*query 3*/
 

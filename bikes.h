@@ -32,19 +32,24 @@ bikeADT string_cpy(bikeADT bike, char * from, size_t stationId);
 void freeADT(bikeADT bike);
 
 /*query 1*/
-char * getStationName(bikeADT bike, int pos);
+char * getStationName(bikeADT bike, size_t pos);
 
 size_t getRealDim(bikeADT bike); 
 
-size_t getMemberTrips(bikeADT bike, int pos); 
+size_t getMemberTrips(bikeADT bike, size_t pos); 
 
-size_t getCausalTrips(bikeADT bike, int pos); 
+size_t getCausalTrips(bikeADT bike, size_t pos); 
 
-size_t getAllTrips(bikeADT bike, int pos);
+size_t getAllTrips(bikeADT bike, size_t pos);
 
 void tripSort(bikeADT bike);
 
 /*query 2*/ 
+size_t getOldestRoute(bikeADT bike, size_t pos);
+
+char * getOldestDateTime(bikeADT bike, size_t pos);
+
+void sortAlpha(bikeADT bike);
 
 /*query 3*/
 
