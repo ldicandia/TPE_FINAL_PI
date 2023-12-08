@@ -30,6 +30,7 @@
 
 # Executables
 *.exe
+*.html
 *.out
 *.app
 *.i*86
@@ -50,3 +51,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
