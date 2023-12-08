@@ -5,60 +5,44 @@
 #include <ctype.h>
 
 #define WEEKS 7
-#define MAYOR(a,b) ((a)>(b) ? (a) : (b))
+#define MAYOR(a,b) ((a)>(b)?(a):(b))
 
 enum days_{DOM=0, LUN, MAR, MIE, JUE, VIE, SAB};
 
-typedef struct rent{
-    char * bikeType;
-    char * bikeStart;
-    char * bikeEnd;
-    size_t idStart;
-    size_t idEnd;
-}TVecRent;
 
-typedef struct oldest{
+typedef struct oldest{ //query 2
     char * oldestDateTime;
     size_t oldestStationId;
 }TOldest;
 
 typedef struct vecStation{
-    TVecRent * bikes;
-    size_t resv_stationBikes;
-    size_t resvBikes;
     size_t idStation;
     char * nameStation;
+    char used;
     //query 1
     size_t memberTrips;
     size_t casualTrips;
     size_t allTrips;
      //query 2
     TOldest oldest;
-    char * mostPopRouteEndStation;
-    struct node * tail;
 }TVecStation;
 
-
-typedef struct q3{
+typedef struct q3{ //query3
     size_t startedTrips;
     size_t endedTrips;
 }TQuery3;
-
 
 typedef struct bikeCDT{
     TVecStation * station;       // vector ordenado por Id
     size_t resv_station;
     size_t dim_station;
-
-    TQuery3 qtyPerDay[WEEKS];    //vector cant por dia;
-    
-    //query 4                    
-    size_t ** matrix;            //matriz cuadrada de cantEstaciones, donde guardamos viaje entre cada estacion
-    size_t qtyStations;          //resv_station matriz de adyacencia,      
+    TQuery3 qtyPerDay[WEEKS];    //vector cant por dia;  
+    //query4
+    size_t ** mat;
+    size_t dim_mat;  
 }bikeCDT;
 
-
-/*------------------aux functions------------------------------*/
+/*------------------aux functions---------------------*/
 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
     char* temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
@@ -66,7 +50,7 @@ bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
     if (temp == NULL){
         return NULL;
     }
-    
+
     bike->station[stationId-1].nameStation = temp;
     strcpy(bike->station[stationId-1].nameStation, from); 
 
@@ -106,12 +90,41 @@ static size_t getDay(char *date ) {
     return days[dayOfWeek];
 }
 
-
-
 static int compareInts(const void *a, const void *b) {
     int intA = *(const int *)a;
     int intB = *(const int *)b;
     return intA - intB;
+}
+
+static int compare(const void *a, const void *b){
+    TVecStation *station1 = (TVecStation *)a;
+    TVecStation *station2 = (TVecStation *)b;
+    int cmp = 0;
+    //Me fijo si el primero tiene menor cantidad de viajes o si tienen igual cantidad y son distintos lexicograficamente.
+    if (station1->allTrips < station2->allTrips){
+        cmp = 1;
+    } else if (station1->allTrips > station2->allTrips){
+        cmp = -1;
+    }
+    if (!cmp)
+        cmp = _strcasecmp(station1->nameStation, station2->nameStation);
+    
+    return cmp;
+}
+
+static int compare_stationData(const void *a, const void *b) {
+    TVecStation *dataA = (TVecStation *)a;
+    TVecStation *dataB = (TVecStation *)b;
+
+    return _strcasecmp(dataA->nameStation, dataB->nameStation); // Si 'name' es el campo que deseas comparar.
+}
+
+static char * copyStr(const char * s){
+    char * copy = malloc(strlen(s) + 1);
+    if(copy == NULL) {
+        return NULL; // or handle the error appropriately
+    }
+    return strcpy(copy, s);
 }
 
 /*-----------------------LOAD--------------------------------*/
@@ -120,7 +133,7 @@ bikeADT new(void){
     return calloc(1, sizeof(struct bikeCDT));
 }
 
-void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate, char * startDate,size_t endId, size_t yearFrom, size_t yearTo){
+void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, size_t endId, size_t isMember, size_t yearFrom, size_t yearTo){
     size_t newSize = MAYOR(startId, endId);
 
     if (bike->resv_station < startId || bike->resv_station < endId){
@@ -133,7 +146,6 @@ void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate
             bike->station[i].allTrips = 0;
             bike->station[i].nameStation = NULL;
             bike->station[i].idStation = 0;
-            bike->station[i].bikes = NULL;
             bike->station[i].oldest.oldestStationId = 0;
             bike->station[i].oldest.oldestDateTime = NULL;
             for(int j = 0; j < WEEKS ; j++){
@@ -153,7 +165,7 @@ void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate
     bike->station[startId-1].allTrips++;
 
     bike->qtyPerDay[getDay(startDate)].startedTrips++;  
-    bike->qtyPerDay[getDay(returnDate)].endedTrips++;
+    bike->qtyPerDay[getDay(endDate)].endedTrips++;
 
    
     if(bike->station[startId-1].oldest.oldestDateTime == NULL){
@@ -166,22 +178,111 @@ void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate
     }
 }
 
-putBikes(){
+//putBikes(){
 
-}
+//}
+
 /*query 1*/
 
+size_t getRealDim(bikeADT bike){
+    return bike->dim_station;
+}
+
+size_t getMemberTrips(bikeADT bike, int pos){
+    return bike->station[pos].memberTrips;
+}
+
+size_t getCausalTrips(bikeADT bike, int pos){
+    return bike->station[pos].casualTrips;
+}
+
+size_t getAllTrips(bikeADT bike, int pos){
+    return bike->station[pos].allTrips;
+}
+
+char * getStationName(bikeADT bike, int pos){
+    return copyStr(bike->station[pos].nameStation);
+}
+
+void tripSort(bikeADT bike){
+    int k=0;
+    for (size_t i=0; i < bike->dim_station ; i++){
+        if (bike->station[i].nameStation != NULL){
+            free(bike->station[k].nameStation);  // liberar la cadena original
+            bike->station[k].nameStation = copyStr(bike->station[i].nameStation);
+            bike->station[k].memberTrips = bike->station[i].memberTrips;
+            bike->station[k].allTrips = bike->station[i].allTrips;
+            bike->station[k].casualTrips = bike->station[i].casualTrips;
+            bike->station[k].oldest = bike->station[i].oldest;
+            bike->station[k++].idStation = i+1;
+            bike->station[k++].used = 0;
+        }    
+    }
+    
+    bike->station = realloc(bike->station, k * sizeof(TVecStation)); //Con este realloc eliminamos del vector todas las estaciones que tengan el used en 0.
+    qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare);
+}
 /*query 2*/
 
 /*query 3*/
 
 /*query 4*/
+void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ // Crea la matriz de adyacencia
+    size_t size = MAYOR(startId, endId);
+    if (bike->dim_mat < size){
+        // Agrego memoria para las filas
+        bike->mat = realloc(bike->mat, size * sizeof(size_t*));
+        if (bike->mat == NULL) {
+            (*flagError) = MEMO_ERR;
+            return;
+        }
+        // Para cada fila agrego memoria a las columnas
+        for (size_t i = 0; i < size; i++) {
+            if (i >= bike->dim_mat) {
+                bike->mat[i] = NULL;  // Asegúrate de que bike->mat[i] esté inicializado
+            }
+            bike->mat[i] = realloc(bike->mat[i], size * sizeof(size_t));
+            if (bike->mat[i] == NULL) {
+                (*flagError) = MEMO_ERR;
+                return;
+            }
+        }
+        // Inicializamos una parte de la matriz con 0
+        for (size_t i = 0; i < bike->dim_mat; i++) {
+            for (size_t j = bike->dim_mat; j < size; j++) {
+                bike->mat[i][j] = 0;
+            }
+        }
+        for (size_t i = bike->dim_mat; i < size; i++){
+            for (size_t j = 0; j < size; j++){
+                bike->mat[i][j] = 0;
+            }
+        }
+        bike->dim_mat = size; // Actualizamos el tamano de la matriz
+    }
+    // Llenamos la matriz con los datos
+    bike->mat[startId-1][endId-1]++;
+}
 
-/*---------------FREES-----------------------------*/
+// Ordena la matriz por orden alfabetico
+void sortAlpha(bikeADT bike){
+
+    qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
+
+}
+/*----------------------FREES-----------------------------*/
 
 void freeADT(bikeADT bike){ //terminar
     free(bike);
 }
+
+
+
+
+
+
+
+
 
 
 

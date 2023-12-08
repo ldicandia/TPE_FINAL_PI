@@ -21,15 +21,28 @@ typedef struct bikeCDT * bikeADT;
 
 bikeADT new(void);
 
+void freeADT(bikeADT bike);
+
 void putBikes(bikeADT bike, size_t startedId, size_t endedId, size_t * flagError);
 
-void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate, char * startDate,size_t endId, size_t yearFrom, size_t yearTo);
+void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, size_t endId, size_t isMember, size_t yearFrom, size_t yearTo);
 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId);
 
 void freeADT(bikeADT bike);
 
 /*query 1*/
+char * getStationName(bikeADT bike, int pos);
+
+size_t getRealDim(bikeADT bike); 
+
+size_t getMemberTrips(bikeADT bike, int pos); 
+
+size_t getCausalTrips(bikeADT bike, int pos); 
+
+size_t getAllTrips(bikeADT bike, int pos);
+
+void tripSort(bikeADT bike);
 
 /*query 2*/ 
 
@@ -40,6 +53,8 @@ size_t startedTrips(bikeADT bike, int day);
 size_t endedTrips(bikeADT bike, int day);
 
 /*query 4*/
+void addMatrix(bikeADT bike, size_t station1Id, size_t station2Id, size_t * flagError);
 
+void sortAlpha(bikeADT bike);
 
 #endif
