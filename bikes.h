@@ -21,6 +21,13 @@ typedef struct bikeCDT * bikeADT;
 
 bikeADT new(void);
 
+void putBikes(bikeADT bike, size_t startedId, size_t endedId, size_t * flagError);
+
+void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate, char * startDate,size_t endId, size_t yearFrom, size_t yearTo);
+
+bikeADT string_cpy(bikeADT bike, char * from, size_t stationId);
+
+void freeADT(bikeADT bike);
 
 /*query 1*/
 

@@ -6,10 +6,15 @@
 #include <time.h>
 #include <ctype.h>
 
-void query1(bikeADT bike);
-void query2(bikeADT bike);
-void query3(bikeADT bike);
-void query4(bikeADT bike);
+void putName(bikeADT bike, const char * inputFile);
+
+bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo);
+
+
+//void query1(bikeADT bike);
+//void query2(bikeADT bike);
+//void query3(bikeADT bike);
+//void query4(bikeADT bike);
 
 int main(int argc, char * argv[]){
     size_t yearFrom=0, yearTo=0;
@@ -27,10 +32,10 @@ int main(int argc, char * argv[]){
         exit(ARG_ERR);
     }
 
-    query1(bike);
-    query2(bike);
-    query3(bike);
-    query4(bike);
+    //query1(bike);
+    //query2(bike);
+    //query3(bike);
+    //query4(bike);
 
     freeADT(bike);
 
@@ -55,8 +60,6 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
 
     fscanf(file, "%s\n", actualRead); /* salta la primer linea */
 
-   
-
     char * bikeStart;
     size_t startId;
     size_t endId;    
@@ -79,7 +82,7 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
         endId = atoi(strtok(NULL, ";")); 
         isMember = atoi(strtok(NULL, "\n"));
 
-        putStation(bike, startId, endId, yearFrom, yearTo);
+        putStation(bike, startId, endId, yearFrom, yearTo);  //falta parametros
         putBikes(bike, startId, endId, &flagError);
 
         if (flagError == MEMO_ERR){   
@@ -129,7 +132,7 @@ void putName(bikeADT bike, const char * inputFile){
         strtok(NULL, ";");//Salteo Latitud 
         strtok(NULL, "\n"); //y longitud.
         
-        bike = strcpy(bike, stationName); 
+        bike = string_cpy(bike, stationName, stationId); //copia al adt el nombre de la estacion
 
         if(bike == NULL){ 
             fprintf(stderr, "Memory error");

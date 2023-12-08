@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #define WEEKS 7
+#define MAYOR(a,b) ((a)>(b) ? (a) : (b))
 
 enum days_{DOM=0, LUN, MAR, MIE, JUE, VIE, SAB};
 
@@ -56,6 +57,22 @@ typedef struct bikeCDT{
     size_t qtyStations;          //resv_station matriz de adyacencia,      
 }bikeCDT;
 
+
+/*------------------aux functions------------------------------*/
+
+bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
+    char* temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
+
+    if (temp == NULL){
+        return NULL;
+    }
+    
+    bike->station[stationId-1].nameStation = temp;
+    strcpy(bike->station[stationId-1].nameStation, from); 
+
+    return bike;
+}
+
 static int _strcasecmp(const char *s1, const char *s2)
 {
     while(*s1 && (toupper((unsigned char)*s1) == toupper((unsigned char)*s2)))
@@ -97,6 +114,11 @@ static int compareInts(const void *a, const void *b) {
     return intA - intB;
 }
 
+/*-----------------------LOAD--------------------------------*/
+
+bikeADT new(void){
+    return calloc(1, sizeof(struct bikeCDT));
+}
 
 void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate, char * startDate,size_t endId, size_t yearFrom, size_t yearTo){
     size_t newSize = MAYOR(startId, endId);
@@ -144,6 +166,9 @@ void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate
     }
 }
 
+putBikes(){
+
+}
 /*query 1*/
 
 /*query 2*/
@@ -152,6 +177,11 @@ void putStation(bikeADT bike, size_t startId, size_t isMember, char * returnDate
 
 /*query 4*/
 
+/*---------------FREES-----------------------------*/
+
+void freeADT(bikeADT bike){ //terminar
+    free(bike);
+}
 
 
 
