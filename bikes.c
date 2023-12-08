@@ -76,12 +76,11 @@ static int getDayOfWeek(int day, int month, int year) {
 }
 
 static size_t getDay(char *date ) {
-    
     char *token = strtok(date, "-");
     int year = atoi(token);
     token = strtok(NULL, "-");
     int month = atoi(token);
-    token = strtok(NULL, "-");
+    token = strtok(NULL, " ");
     int day = atoi(token);
 
     int dayOfWeek = getDayOfWeek(day, month, year);
@@ -178,11 +177,9 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
     }
 }
 
-//putBikes(){
 
-//}
 
-/*query 1*/
+//query 1
 
 size_t getRealDim(bikeADT bike){
     return bike->dim_station;
@@ -227,6 +224,7 @@ void tripSort(bikeADT bike){
 /*query 3*/
 
 /*query 4*/
+
 void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ // Crea la matriz de adyacencia
     size_t size = MAYOR(startId, endId);
     if (bike->dim_mat < size){

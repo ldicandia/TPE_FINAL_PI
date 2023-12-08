@@ -7,9 +7,9 @@
 #include <ctype.h>
 #define SEMICOLONS 4
 
-void putName(bikeADT bike, const char * inputFile);
+void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons);
 
-bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo);
+bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t * semiColons);
 
 //void query1(bikeADT bike);
 //void query2(bikeADT bike);
@@ -17,16 +17,17 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo);
 //void query4(bikeADT bike);
 
 int main(int argc, char * argv[]){
+    size_t semiColons;
     size_t yearFrom=0, yearTo=0;
     
     bikeADT bike;
 
     if (strcmp(argv[1], argv[2]) > 0){
-        bike = putCsv(argv[2], yearFrom, yearTo);
-        putName(bike, argv[1]);
+        bike = csvReader(argv[2], yearFrom, yearTo, &semiColons);
+        nameReader(bike, argv[1], &semiColons);
     }else if (strcmp(argv[1], argv[2]) < 0){
-        bike = putCsv(argv[1], yearFrom, yearTo);
-        putName(bike, argv[2]);
+        bike = csvReader(argv[1], yearFrom, yearTo, &semiColons);
+        nameReader(bike, argv[2], &semiColons);
     }else{
         fprintf(stderr, "Invalid arguments order\n");
         exit(ARG_ERR);
@@ -51,7 +52,7 @@ int main(int argc, char * argv[]){
 // 2021-09-20 06:31:28;348;2021-09-20 07:02:22;332;1
 
 //funcion que lee los archivos csv en cualquiera de los dos formatos y guarda los datos en variables
-bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
+bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t * semiColons){
     FILE * file = fopen(inputFile, "rt");
         if(file == NULL){
             fprintf(stderr, "Error opeing file%s\n", inputFile);
@@ -66,7 +67,7 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
     }
 
     char actualRead[MAXCHAR];
-    size_t semiColons=0;
+    (*semiColons)=0;
     
      if (fgets(actualRead, sizeof(actualRead), file) == NULL) {
          perror("Error reading file");
@@ -85,7 +86,7 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
      }
 
      if(count==0){
-        semiColons=1;
+        (*semiColons)=1;
      }
  
 
@@ -128,7 +129,7 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
         //copia endId
         endId = atoi(strtok(NULL, ";"));
 //saltea el biketype si es q esta
-        if(semiColons==1){
+        if(*semiColons){
             strtok(NULL, ";");
         }
         isMember = atoi(strtok(NULL, "\n"));
@@ -139,7 +140,7 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
         free(endDate);
     }
 
-        putMatrix(bike, startId, endId, &flagError);
+        addMatrix(bike, startId, endId, &flagError);
 
         if (flagError == MEMO_ERR){
             fprintf(stderr, "NULL token error");
@@ -153,8 +154,16 @@ bikeADT putCsv(const char * inputFile, size_t yearFrom, size_t yearTo){
     return bike;
     
 }
+//ejemplo csv nyc
+//nombre               ; latitud ; longitud ; id
+//River Ave & E 151 St;40.822217;-73.928939;796704
 
-void putName(bikeADT bike, const char * inputFile){
+//ejemplo csv mon
+//id  ; nombre ; latitud ;longitud
+//327;Sanguinet / de Maisonneuve;45.513405;-73.562594
+
+
+void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons){
     FILE * file = fopen(inputFile, "rt");
         if(file == NULL){
             fprintf(stderr, "Error opeing file%s\n", inputFile);
@@ -169,8 +178,13 @@ void putName(bikeADT bike, const char * inputFile){
     char * stationName;
 
     while(fgets(actualRead, MAXCHAR, file) != NULL){
+       
+       //CASO CSV CANADA
+       if(!(*semiColons)){
+        //copia id
         stationId = atoi(strtok(actualRead,";"));
-        token = strtok(NULL,";");
+        
+        //copia name
         if(token != NULL){
             stationName = malloc((strlen(token)+1)); // * sizeof(char)
             if(stationName != NULL){
@@ -183,8 +197,29 @@ void putName(bikeADT bike, const char * inputFile){
             fprintf(stderr, "NULL token error");
             exit(TOK_ERR);
         }
+        
         strtok(NULL, ";");//Salteo Latitud 
-        strtok(NULL, "\n"); //y longitud.
+        strtok(NULL, "\n"); //y longitud
+       }else{ //CASO CSV NYC
+
+            if(token != NULL){
+            stationName = malloc((strlen(token)+1)); // * sizeof(char)
+            if(stationName != NULL){
+                strcpy(stationName, token);
+            }else{
+                fprintf(stderr, "Memory error");
+                exit(MEMO_ERR);
+            }
+        }else{
+            fprintf(stderr, "NULL token error");
+            exit(TOK_ERR);
+        }
+        token = strtok(NULL,";");
+        strtok(NULL, ";");//Salteo Latitud 
+        strtok(NULL, "\n"); //y longitud
+        //copia id
+        stationId = atoi(strtok(actualRead,";"));
+       }
         
         bike = string_cpy(bike, stationName, stationId); //copia al adt el nombre de la estacion
 
@@ -192,7 +227,7 @@ void putName(bikeADT bike, const char * inputFile){
             fprintf(stderr, "Memory error");
             exit(MEMO_ERR);
         } 
-
+        bike = string_cpy(bike, stationName, stationId); 
         free(stationName);
 
     }
