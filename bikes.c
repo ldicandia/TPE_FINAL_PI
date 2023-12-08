@@ -15,6 +15,11 @@ typedef struct oldest{ //query 2
     size_t oldestStationId;
 }TOldest;
 
+typedef struct popular{
+    char * mostPopRouteEndStation;
+    size_t mostPopRouteTrips;
+}TMostPopular;
+
 typedef struct vecStation{
     size_t idStation;
     char * nameStation;
@@ -25,6 +30,8 @@ typedef struct vecStation{
     size_t allTrips;
      //query 2
     TOldest oldest;
+    //query 4
+    TMostPopular most;
 }TVecStation;
 
 typedef struct q3{ //query3
@@ -40,6 +47,7 @@ typedef struct bikeCDT{
     //query4
     size_t ** mat;
     size_t dim_mat;  
+    
 }bikeCDT;
 
 /*------------------aux functions---------------------*/
@@ -150,6 +158,9 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
             bike->station[i].idStation = 0;
             bike->station[i].oldest.oldestStationId = 0;
             bike->station[i].oldest.oldestDateTime = NULL;
+            bike->station[i].used = 0;
+            bike->station[i].most.mostPopRouteEndStation = NULL;
+            bike->station[i].most.mostPopRouteTrips = 0;
             for(int j = 0; j < WEEKS ; j++){
                 bike->qtyPerDay[j].endedTrips = 0;
                 bike->qtyPerDay[j].startedTrips = 0;
@@ -261,7 +272,6 @@ size_t getEndedTrips(bikeADT bike, int day, int * flag){
 }
 
 /*query 4*/
-
 void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ // Crea la matriz de adyacencia
     size_t size = MAYOR(startId, endId);
     if (bike->dim_mat < size){
@@ -299,11 +309,17 @@ void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ 
     bike->mat[startId-1][endId-1]++;
 }
 
+char * getMostPopRouteEndStation(bikeADT bike, size_t pos){
+    return copyStr(bike->station[pos].most.mostPopRouteEndStation);
+}
+
+size_t getMostPopRouteTrips(bikeADT bike, size_t pos){
+    return bike->station[pos].most.mostPopRouteTrips;
+}
+
 // Ordena la matriz por orden alfabetico
 void sortAlpha(bikeADT bike){
-
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
-
 }
 /*----------------------FREES-----------------------------*/
 

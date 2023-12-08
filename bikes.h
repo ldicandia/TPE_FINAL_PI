@@ -64,4 +64,9 @@ void addMatrix(bikeADT bike, size_t station1Id, size_t station2Id, size_t * flag
 
 void sortAlpha(bikeADT bike);
 
+char * getMostPopRouteEndStation(bikeADT bike, size_t pos);
+
+size_t getMostPopRouteTrips(bikeADT bike, size_t pos);
+
 #endif
+
