@@ -45,6 +45,7 @@ size_t getAllTrips(bikeADT bike, size_t pos);
 void tripSort(bikeADT bike);
 
 /*query 2*/ 
+
 size_t getOldestRoute(bikeADT bike, size_t pos);
 
 char * getOldestDateTime(bikeADT bike, size_t pos);
@@ -53,11 +54,12 @@ void sortAlpha(bikeADT bike);
 
 /*query 3*/
 
-size_t startedTrips(bikeADT bike, int day);
+size_t getstartedTrips(bikeADT bike, int day, int * flag);
 
-size_t endedTrips(bikeADT bike, int day);
+size_t getEndedTrips(bikeADT bike, int day, int * flag);
 
 /*query 4*/
+
 void addMatrix(bikeADT bike, size_t station1Id, size_t station2Id, size_t * flagError);
 
 void sortAlpha(bikeADT bike);

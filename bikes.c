@@ -244,6 +244,22 @@ void sortAlpha(bikeADT bike){
 
 /*query 3*/
 
+size_t getstartedTrips(bikeADT bike, int day, int * flag){
+    if(day > WEEKS){
+        *flag = 1;
+        return 0;
+    }
+    return bike->qtyPerDay[day].startedTrips;
+}
+
+size_t getEndedTrips(bikeADT bike, int day, int * flag){
+    if(day > WEEKS){
+        *flag = 1;
+        return 0;
+    }
+    return bike->qtyPerDay[day].endedTrips;
+}
+
 /*query 4*/
 
 void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ // Crea la matriz de adyacencia
