@@ -323,7 +323,17 @@ void sortAlpha(bikeADT bike){
 }
 /*----------------------FREES-----------------------------*/
 
-void freeADT(bikeADT bike){ //terminar
+void freeADT(bikeADT bike){ 
+    for (size_t i = 0; i < bike->dim_station; i++){
+        free(bike->station[i].nameStation);
+        free(bike->station[i].oldest.oldestDateTime);
+        free(bike->station[i].most.mostPopRouteEndStation);
+    }
+    free(bike->station);
+    for (size_t i = 0; i < bike->dim_mat; i++){
+        free(bike->mat[i]);
+    }
+    free(bike->mat);
     free(bike);
 }
 

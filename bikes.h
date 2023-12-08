@@ -68,5 +68,7 @@ char * getMostPopRouteEndStation(bikeADT bike, size_t pos);
 
 size_t getMostPopRouteTrips(bikeADT bike, size_t pos);
 
+void freeADT(bikeADT bike);
+
 #endif
 
