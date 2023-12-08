@@ -45,7 +45,10 @@ typedef struct bikeCDT{
 /*------------------aux functions---------------------*/
 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
-    char* temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
+    //char * temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
+
+    bike->station[stationId-1].nameStation = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
+    char * temp = malloc(strlen(from)+1);
 
     if (temp == NULL){
         return NULL;
