@@ -261,17 +261,22 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     }
     bike->station[startId-1].allTrips++;
 
-    char * aux = copyStr(startDate);
-    char * tokenaux = strtok(aux, " ");
-    size_t start = getDay(tokenaux);
-
-    char * aux2 = copyStr(endDate);
-    char * tokenaux2 = strtok(aux2, " ");
-    size_t end = getDay(tokenaux2); 
-
+    char aux[11];
+    int i;
+    for(i = 0 ; i < 11 ; i++)
+        aux[i] = startDate[i];
     
-    free(aux);
-    free(aux2);
+    aux[i] = 0;
+
+    size_t start = getDay(aux);
+
+    char aux2[11];
+    for(i = 0 ; i < 11 ; i++)
+        aux2[i] = endDate[i];
+    
+    aux2[i] = 0;
+    size_t end = getDay(aux2); 
+
 
     bike->qtyPerDay[start].startedTrips++;  
     bike->qtyPerDay[end].endedTrips++;
@@ -327,7 +332,7 @@ void tripSort(bikeADT bike){
             bike->station[k++].idStation = i+1;
             bike->station[k++].used = 1;
         }    
-        bike->station[i].used == 0;
+        bike->station[i].used = 0;
     }
     
     bike->station = realloc(bike->station, k * sizeof(TVecStation)); //Con este realloc eliminamos del vector todas las estaciones que tengan el used en 0.

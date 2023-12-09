@@ -182,7 +182,8 @@ bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t
         //copia startDate
         //corto temporalmente la hora, solucionar despues
         // 2022-11-17 19:05:10.000000;489509;2022-11-17 19:07:30.000000;490309;classic_bike;member
-       
+        // 2021-09-20 06:31:28;348;2021-09-20 07:02:22;332;1
+
         int result = sscanf(actualRead, "%19[^;];%ld;%19[^;];%ld;%ld", startDate, &startId, endDate, &endId, &isMember);
         
         if(result != 5){
