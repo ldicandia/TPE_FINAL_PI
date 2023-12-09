@@ -22,7 +22,8 @@ int main(int argc, char * argv[]){
     size_t semiColons;
     size_t yearFrom=0, yearTo=0;
     
-    bikeADT bike=new();
+    bikeADT bike = new();
+    
     if (argc < 3){
         fprintf(stderr, "Invalid arguments\n");
         exit(ARG_ERR);
@@ -146,7 +147,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     char actualRead[MAXCHAR];
     (*semiColons) = 0;
 
-    // Omite la primera línea
+    // Omite la primera línear
     if (fgets(actualRead, sizeof(actualRead), file) == NULL) {
         perror("Error reading file");
         fclose(file);
@@ -154,7 +155,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     }
 
     // Código para extraer solo la fecha
-    char startDate[11], endDate[11];
+    char startDate[20], endDate[20];
     size_t startId, endId, isMember;
     char datetime[LEN_HOURS];  // Para almacenar la fecha y hora temporalmente
 

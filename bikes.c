@@ -52,51 +52,57 @@ typedef struct bikeCDT{
 }bikeCDT;
 
 /*------------------aux functions---------------------*/
-
+/*
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
-    //char * temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
-    /*
-    bike->station[stationId-1].nameStation = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
-    char * temp = malloc(strlen(from)+1);
+    
+    if (bike->station[stationId - 1].nameStation == NULL) {
+        // Esto debería ser manejado, ya que realloc se comporta como malloc si el puntero original es NULL
+        fprintf(stderr, "Error: El puntero original es NULL.\n");
+         return NULL;
+    }
 
-    if (temp == NULL){
+    char *temp = malloc(strlen(from) + 1);
+    if (temp == NULL) {
+        fprintf(stderr, "Error: Fallo en la asignación de memoria temporal.\n");
         return NULL;
     }
 
-    bike->station[stationId-1].nameStation = temp;
-    strcpy(bike->station[stationId-1].nameStation, from); 
+    char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
+    if (newName == NULL) {
+         fprintf(stderr, "Error: Fallo en realloc.\n");
+         free(temp);
+         return NULL;
+    }
+
+    bike->station[stationId - 1].nameStation = newName;
+    strcpy(bike->station[stationId - 1].nameStation, from);
+
+    free(temp);  // Liberar memoria temporal
 
     return bike;
-    */
-    
-   
+}
+*/
+bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
+    // Validar entradas
+    if (bike == NULL || from == NULL) {
+        fprintf(stderr, "Error: Entrada nula.\n");
+        return NULL;
+    }
 
-if (bike->station[stationId - 1].nameStation == NULL) {
-    // Esto debería ser manejado, ya que realloc se comporta como malloc si el puntero original es NULL
-    fprintf(stderr, "Error: El puntero original es NULL.\n");
-    return NULL;
+    // Redimensionar o asignar nueva memoria para el nombre de la estación
+    char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
+    if (newName == NULL) {
+        fprintf(stderr, "Error: Fallo en realloc.\n");
+        return NULL;
+    }
+
+    // Actualizar el puntero y copiar la nueva cadena
+    bike->station[stationId - 1].nameStation = newName;
+    strcpy(bike->station[stationId - 1].nameStation, from);
+
+    return bike;
 }
 
-char *temp = malloc(strlen(from) + 1);
-if (temp == NULL) {
-    fprintf(stderr, "Error: Fallo en la asignación de memoria temporal.\n");
-    return NULL;
-}
-
-char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
-if (newName == NULL) {
-    fprintf(stderr, "Error: Fallo en realloc.\n");
-    free(temp);
-    return NULL;
-}
-
-bike->station[stationId - 1].nameStation = newName;
-strcpy(bike->station[stationId - 1].nameStation, from);
-
-free(temp);  // Liberar memoria temporal
-
-return bike;
-}
 
 static int _strcasecmp(const char *s1, const char *s2)
 {
@@ -198,7 +204,7 @@ static char * copyStr(const char * s) {
 /*-----------------------LOAD--------------------------------*/
 
 bikeADT new(void){
-    return calloc(1, sizeof(struct bikeCDT));
+    return calloc(1, sizeof(bikeCDT));
 }
 
 void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], size_t endId, size_t isMember, size_t yearFrom, size_t yearTo){
