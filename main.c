@@ -129,89 +129,66 @@ void query4(bikeADT bike){
 //funcion que lee los archivos csv en cualquiera de los dos formatos y guarda los datos en variables
 
 
-bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t * semiColons){
-    FILE * file = fopen(inputFile, "r");
-    
-    if(file == NULL){   
+bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *semiColons) {
+    FILE *file = fopen(inputFile, "r");
+
+    if (file == NULL) {
         fprintf(stderr, "Error opening file %s\n", inputFile);
         exit(OPEN_ERR);
     }
-    
 
     bikeADT bike = new();
-
-    if( bike == NULL ){
-        fprintf(stderr, "Memory error");
+    if (bike == NULL) {
+        fprintf(stderr, "Memory error\n");
         exit(MEMO_ERR);
     }
 
     char actualRead[MAXCHAR];
-    (*semiColons)=0;
-    
-     if (fgets(actualRead, sizeof(actualRead), file) == NULL) {
-         perror("Error reading file");
-         fclose(file);
-         return 0;
-     }
+    (*semiColons) = 0;
 
+    // Omite la primera línea
+    if (fgets(actualRead, sizeof(actualRead), file) == NULL) {
+        perror("Error reading file");
+        fclose(file);
+        return 0;
+    }
 
-     // Contar los ";" en la primera línea
-     size_t count = SEMICOLONS;
-     for (size_t i = 0; actualRead[i] != '\0'; i++) {
-         if (actualRead[i] == ';') {
-             count--;
-         }
-     }
+    // Código para extraer solo la fecha
+    char startDate[11], endDate[11];
+    size_t startId, endId, isMember;
+    char datetime[LEN_HOURS];  // Para almacenar la fecha y hora temporalmente
 
-     if(count==0){
-        (*semiColons)=1;
-     }
-    
-
-    fscanf(file, "%s\n", actualRead); //salta la primer linea
-
-    char startDate[LEN_HOURS];
-    size_t startId;
-    char endDate[LEN_HOURS];
-    size_t endId;   
-    size_t isMember;
-    
-    size_t flagError = 0;
-
-    while(fgets(actualRead, MAXCHAR, file) != NULL){
-        //copia startDate
-        //corto temporalmente la hora, solucionar despues
-        // 2022-11-17 19:05:10.000000;489509;2022-11-17 19:07:30.000000;490309;classic_bike;member
-        // 2021-09-20 06:31:28;348;2021-09-20 07:02:22;332;1
-
-        //REVISAR COMO RECIBE LAS LINEAS CON EL SSCANF VER QUE DATOS RECIBE EL PUTSTATION
-
-        int result = sscanf(actualRead, "%19[^;];%ld;%19[^;];%ld;%ld", startDate, &startId, endDate, &endId, &isMember);
-        
-        if(result != 5){
-            exit(1);
+    while (fgets(actualRead, MAXCHAR, file) != NULL) {
+        int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", datetime, &startId, datetime, &endId, &isMember);
+        if (result != 5) {
+            fprintf(stderr, "Error parsing line: %s\n", actualRead);
+            continue; // O manejar el error como sea adecuado
         }
-        putStation(bike, startDate,startId, endDate, endId, isMember, yearFrom, yearTo);
 
-        if (bike == NULL){
-            fprintf(stderr, "Memory error");
+        // Extraer solo la fecha de las cadenas de fecha y hora
+        sscanf(datetime, "%10s", startDate);
+        sscanf(datetime, "%10s", endDate);
+
+        putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
+
+        if (bike == NULL) {
+            fprintf(stderr, "Memory error\n");
             exit(MEMO_ERR);
         }
-        
+
+        size_t flagError = 0;
         addMatrix(bike, startId, endId, &flagError);
 
-        if (flagError == MEMO_ERR){
-            fprintf(stderr, "NULL token error");
+        if (flagError == MEMO_ERR) {
+            fprintf(stderr, "NULL token error\n");
             exit(TOK_ERR);
         }
     }
-    
-    fclose(file);
-   
-    return bike;
-    
-}
 
+    fclose(file);
+
+    return bike;
+}
 
 
 //ejemplo csv nyc

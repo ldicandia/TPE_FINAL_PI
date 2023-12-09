@@ -120,35 +120,32 @@ static int getDayOfWeek(int day, int month, int year) {
 }
 */
 
-
-
 //hacer otro getDay para las horas
 
-static int getDay(const char *dateStr) {
-    if (dateStr == NULL) {
-        fprintf(stderr, "Null pointer passed to getDay\n");
-        exit(1); // Or handle the error as appropriate
-    }
-    struct tm dateStruct;
-    memset(&dateStruct, 0, sizeof(struct tm));
+static int getDay(const char *day) {
+    struct tm tm;
+    time_t t;
 
-    if(sscanf(dateStr, "%d-%d-%d", &dateStruct.tm_year, &dateStruct.tm_mon, &dateStruct.tm_mday) != 3) {
-        fprintf(stderr, "Invalid date format: %s\n", dateStr);
-        exit(1);
-    }
-
-    dateStruct.tm_year -= 1900; 
-    dateStruct.tm_mon--;       
-
-    time_t timestamp = mktime(&dateStruct);
-
-    if (timestamp == -1) {
-        perror("mktime");
+    if (strptime(day, "%Y-%m-%d", &tm) == NULL) {
+        fprintf(stderr, "Invalid date format: %s\n", day);
         return -1; 
     }
-    int dayOfWeek = localtime(&timestamp)->tm_wday;
 
-    return dayOfWeek;
+    tm.tm_hour = 0;  
+    tm.tm_min = 0;  
+    tm.tm_sec = 0;  
+    tm.tm_isdst = -1;  
+
+    
+    t = mktime(&tm);
+
+    if (t == -1) {
+        fprintf(stderr, "Error converting time\n");
+        return -1;
+    }
+
+    
+    return tm.tm_wday;
 }
 
 
@@ -267,9 +264,14 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     /////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
 
+    //quiero que getDay me devuelva el dia de la semana en numero yo le paso una fecha con formato 2022-11-17 19:05:10 y me devuelve el dia de la semana
+
     char aux[11];
     strncpy(aux, startDate, 10);
     aux[10] = 0;
+
+
+
     size_t start = getDay(aux);
 
     char aux2[11];
