@@ -19,6 +19,7 @@ typedef struct oldest{ //query 2
 typedef struct popular{
     char * mostPopRouteEndStation;
     size_t mostPopRouteTrips;
+    size_t mostPopRouteEndStationId;
 }TMostPopular;
 
 typedef struct vecStation{
@@ -60,16 +61,10 @@ bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
         return NULL;
     }
 
-    // Redimensionar o asignar nueva memoria para el nombre de la estación
-    char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
-    if (newName == NULL) {
-        fprintf(stderr, "Error: Fallo en realloc.\n");
-        return NULL;
-    }
-
     // Actualizar el puntero y copiar la nueva cadena
-    bike->station[stationId - 1].nameStation = newName;
-    strcpy(bike->station[stationId - 1].nameStation, from);
+    bike->station[stationId - 1].nameStation = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
+    char * aux =strcpy(bike->station[stationId-1].nameStation, from);
+    free(aux);
 
     return bike;
 }
@@ -249,6 +244,7 @@ char * getStationName(bikeADT bike, size_t pos){
         fprintf(stderr, "Passing NULL bike getStationName");
         exit(1);
     }
+
     return copyStr(bike->station[pos].nameStation);
 }
 
@@ -264,9 +260,13 @@ void tripSort(bikeADT bike){
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
             bike->station[k].oldest = bike->station[i].oldest;
+            
             if(bike->station[i].most.mostPopRouteEndStation != NULL){
+                free(bike->station[k].most.mostPopRouteEndStation);
                 bike->station[k].most.mostPopRouteEndStation = copyStr(bike->station[i].most.mostPopRouteEndStation);
+
             }
+            //agregarIdMost
             bike->station[k].most.mostPopRouteTrips = bike->station[i].most.mostPopRouteTrips;
             bike->station[k].idStation = i+1;
             bike->station[k++].used = 1;
@@ -320,6 +320,12 @@ size_t getEndedTrips(bikeADT bike, int day, int * flag){
     return bike->qtyPerDay[day].endedTrips;
 }
 
+char * getDayOfTheWeek(size_t day){
+    const char * days[] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"};
+    return days[day];
+}
+
+
 /*query 4*/
 void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ // Crea la matriz de adyacencia
     size_t size = MAYOR(startId, endId);
@@ -355,6 +361,7 @@ void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ 
         bike->dim_mat = size; // Actualizamos el tamano de la matriz
     }
     // Llenamos la matriz con los datos
+    /*
     bike->mat[startId-1][endId-1]++;
     if(bike->mat[startId-1][endId-1] > bike->station[startId-1].most.mostPopRouteTrips){
         bike->station[startId-1].most.mostPopRouteTrips = bike->mat[startId-1][endId-1];
@@ -362,6 +369,26 @@ void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ 
         if(bike->station[endId-1].nameStation != NULL){
             bike->station[startId-1].most.mostPopRouteEndStation = malloc(strlen(bike->station[endId-1].nameStation)+1); 
             strcpy(bike->station[startId-1].most.mostPopRouteEndStation, bike->station[endId-1].nameStation);
+        }
+    }
+    */
+    // Incremento del contador de viajes para esta ruta
+    bike->mat[startId-1][endId-1]++;
+    
+    // Verificar si esta ruta es ahora la mas popular
+    if (bike->mat[startId-1][endId-1] > bike->station[startId-1].most.mostPopRouteTrips) {
+        bike->station[startId-1].most.mostPopRouteTrips = bike->mat[startId-1][endId-1];
+        bike->station[startId-1].most.mostPopRouteEndStationId = endId;
+    }
+}
+
+void addMost(bikeADT bike, size_t stationId){
+    size_t aux = 0;
+    for(int i = 1 ; i < bike->resv_station ; i++){
+        if(bike->station[i-1].used){
+            free(bike->station[i - 1].most.mostPopRouteEndStation);
+            aux = bike->station[i - 1].most.mostPopRouteEndStationId;
+            bike->station[i-1].most.mostPopRouteEndStation = copyStr(bike->station[aux-1].nameStation); 
         }
     }
 

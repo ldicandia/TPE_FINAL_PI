@@ -56,6 +56,8 @@ size_t getstartedTrips(bikeADT bike, int day, int * flag);
 
 size_t getEndedTrips(bikeADT bike, int day, int * flag);
 
+char * getDayOfTheWeek(size_t day);
+
 /*query 4*/
 
 void addMatrix(bikeADT bike, size_t station1Id, size_t station2Id, size_t * flagError);
@@ -65,6 +67,8 @@ void sortAlpha(bikeADT bike);
 char * getMostPopRouteEndStation(bikeADT bike, size_t pos);
 
 size_t getMostPopRouteTrips(bikeADT bike, size_t pos);
+
+void addMost(bikeADT bike, size_t stationId);
 
 void freeADT(bikeADT bike);
 
