@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 #define WEEKS 7
 #define MAYOR(a,b) ((a)>(b)?(a):(b))
@@ -54,7 +55,7 @@ typedef struct bikeCDT{
 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
     //char * temp = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
-
+    /*
     bike->station[stationId-1].nameStation = realloc(bike->station[stationId-1].nameStation, (strlen(from)+1) * sizeof(char));
     char * temp = malloc(strlen(from)+1);
 
@@ -66,6 +67,35 @@ bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
     strcpy(bike->station[stationId-1].nameStation, from); 
 
     return bike;
+    */
+    
+   
+
+if (bike->station[stationId - 1].nameStation == NULL) {
+    // Esto debería ser manejado, ya que realloc se comporta como malloc si el puntero original es NULL
+    fprintf(stderr, "Error: El puntero original es NULL.\n");
+    return NULL;
+}
+
+char *temp = malloc(strlen(from) + 1);
+if (temp == NULL) {
+    fprintf(stderr, "Error: Fallo en la asignación de memoria temporal.\n");
+    return NULL;
+}
+
+char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
+if (newName == NULL) {
+    fprintf(stderr, "Error: Fallo en realloc.\n");
+    free(temp);
+    return NULL;
+}
+
+bike->station[stationId - 1].nameStation = newName;
+strcpy(bike->station[stationId - 1].nameStation, from);
+
+free(temp);  // Liberar memoria temporal
+
+return bike;
 }
 
 static int _strcasecmp(const char *s1, const char *s2)
@@ -75,6 +105,9 @@ static int _strcasecmp(const char *s1, const char *s2)
     return toupper((unsigned char)*s1) - toupper((unsigned char)*s2);
 }
 
+//get day, year, month of the char date
+
+/*
 static int getDayOfWeek(int day, int month, int year) {
     if (month < 3) {
         month += 12;
@@ -85,26 +118,48 @@ static int getDayOfWeek(int day, int month, int year) {
     int dayOfWeek = (day + 13 * (month + 1) / 5 + k + k / 4 + j / 4 + 5 * j) % 7;
     return dayOfWeek;
 }
+*/
 
-static size_t getDay(char *date ) {
-    char *token = strtok(date, "-");
-    int year = atoi(token);
-    token = strtok(NULL, "-");
-    int month = atoi(token);
-    token = strtok(NULL, " ");
-    int day = atoi(token);
 
-    int dayOfWeek = getDayOfWeek(day, month, year);
-    int days[WEEKS] = {DOM, LUN, MAR, MIE, JUE, VIE, SAB};
-    
-    return days[dayOfWeek];
+
+//hacer otro getDay para las horas
+
+static int getDay(const char *dateStr) {
+    if (dateStr == NULL) {
+        fprintf(stderr, "Null pointer passed to getDay\n");
+        exit(1); // Or handle the error as appropriate
+    }
+    struct tm dateStruct;
+    memset(&dateStruct, 0, sizeof(struct tm));
+
+    if(sscanf(dateStr, "%d-%d-%d", &dateStruct.tm_year, &dateStruct.tm_mon, &dateStruct.tm_mday) != 3) {
+        fprintf(stderr, "Invalid date format: %s\n", dateStr);
+        exit(1);
+    }
+
+    dateStruct.tm_year -= 1900; 
+    dateStruct.tm_mon--;       
+
+    time_t timestamp = mktime(&dateStruct);
+
+    if (timestamp == -1) {
+        perror("mktime");
+        return -1; 
+    }
+    int dayOfWeek = localtime(&timestamp)->tm_wday;
+
+    return dayOfWeek;
 }
 
+
+/*
 static int compareInts(const void *a, const void *b) {
     int intA = *(const int *)a;
     int intB = *(const int *)b;
     return intA - intB;
 }
+*/
+
 
 static int compare(const void *a, const void *b){
     TVecStation *station1 = (TVecStation *)a;
@@ -129,13 +184,19 @@ static int compare_stationData(const void *a, const void *b) {
     return _strcasecmp(dataA->nameStation, dataB->nameStation); // Si 'name' es el campo que deseas comparar.
 }
 
-static char * copyStr(const char * s){
-    char * copy = malloc(strlen(s) + 1);
-    if(copy == NULL) {
-        return NULL; // or handle the error appropriately
+static char * copyStr(const char * s) {
+    if (s == NULL) {
+        return NULL;
     }
-    return strcpy(copy, s);
+    char * copy = malloc(strlen(s) + 1);
+    if (copy == NULL) {
+        fprintf(stderr, "Memory allocation error in copyStr\n");
+        exit(1); // Or handle the error as appropriate
+    }
+    strcpy(copy, s);
+    return copy;
 }
+
 
 /*-----------------------LOAD--------------------------------*/
 
@@ -143,14 +204,26 @@ bikeADT new(void){
     return calloc(1, sizeof(struct bikeCDT));
 }
 
-void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, size_t endId, size_t isMember, size_t yearFrom, size_t yearTo){
-    size_t newSize = MAYOR(startId, endId);
-
-    if (bike->resv_station < startId || bike->resv_station < endId){
-        bike->station = realloc(bike->station, newSize * sizeof(TVecStation)); // Agrego memoria si es que el station dado es menor a resv_station
-
-        for (int i = bike->resv_station; i < newSize; i++)
-        {
+void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], size_t endId, size_t isMember, size_t yearFrom, size_t yearTo){
+    if (bike == NULL){
+        return;
+    }
+    if (startId == 0 || endId == 0){
+        return;
+    }
+    if (startId == endId){
+        return;
+    }
+    if (yearFrom > yearTo){
+        return;
+    }
+    
+    if (bike->dim_station < MAYOR(startId, endId)){
+        bike->station = realloc(bike->station, MAYOR(startId, endId) * sizeof(TVecStation));
+        if (bike->station == NULL){
+            return;
+        }
+        for (int i = bike->dim_station; i < MAYOR(startId, endId); i++){
             bike->station[i].memberTrips = 0;
             bike->station[i].casualTrips = 0;
             bike->station[i].allTrips = 0;
@@ -166,8 +239,19 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
                 bike->qtyPerDay[j].startedTrips = 0;
             }
         }
-        bike->resv_station = newSize;
+        bike->dim_station = MAYOR(startId, endId);
     }
+    size_t newSize = MAYOR(startId, endId);
+
+    if (bike->station[startId-1].nameStation == NULL){
+        bike->station[startId-1].nameStation = malloc(strlen(startDate)+1);
+        bike->station[startId-1].nameStation = strcpy(bike->station[startId-1].nameStation, startDate);
+        bike->station[startId-1].idStation = startId;
+        bike->station[startId-1].used = 1;
+    }
+
+    bike->station[startId-1].used = 1;
+
 
 //aumentamos cantidades depende si es miembro o no
     if(isMember){
@@ -177,17 +261,30 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
     }
     bike->station[startId-1].allTrips++;
 
-    bike->qtyPerDay[getDay(startDate)].startedTrips++;  
-    bike->qtyPerDay[getDay(endDate)].endedTrips++;
+    char * aux = copyStr(startDate);
+    char * tokenaux = strtok(aux, " ");
+    size_t start = getDay(tokenaux);
+
+    char * aux2 = copyStr(endDate);
+    char * tokenaux2 = strtok(aux2, " ");
+    size_t end = getDay(tokenaux2); 
+
+    
+    free(aux);
+    free(aux2);
+
+    bike->qtyPerDay[start].startedTrips++;  
+    bike->qtyPerDay[end].endedTrips++;
 
    
     if(bike->station[startId-1].oldest.oldestDateTime == NULL){
-        bike->station[startId - 1].oldest.oldestDateTime = malloc(strlen(startDate)+1);
-        bike->station[startId - 1].oldest.oldestDateTime = strcpy(bike->station[startId - 1].oldest.oldestDateTime, startDate);
+        bike->station[startId-1].oldest.oldestDateTime = malloc(strlen(startDate)+1);
+        bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId - 1].oldest.oldestDateTime, startDate);
+        bike->station[startId-1].oldest.oldestStationId = endId;
     }
     else if (strcmp(startDate, bike->station[startId-1].oldest.oldestDateTime) < 0){
-        bike->station[startId - 1].oldest.oldestDateTime = startDate;
-        bike->station[startId - 1].oldest.oldestStationId = endId;
+        bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId-1].oldest.oldestDateTime, startDate);
+        bike->station[startId-1].oldest.oldestStationId = endId;
     }
 }
 
@@ -247,11 +344,6 @@ char * getOldestDateTime(bikeADT bike, size_t pos){//devuelve el oldest Date tim
     return copyStr(bike->station[pos].oldest.oldestDateTime);
 }
 
-
-// Ordena el vector por orden alfabetico
-void sortAlpha(bikeADT bike){
-    qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
-}
 
 /*query 3*/
 
