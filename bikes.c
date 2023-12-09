@@ -52,36 +52,7 @@ typedef struct bikeCDT{
 }bikeCDT;
 
 /*------------------aux functions---------------------*/
-/*
-bikeADT string_cpy(bikeADT bike, char * from, size_t stationId){
-    
-    if (bike->station[stationId - 1].nameStation == NULL) {
-        // Esto debería ser manejado, ya que realloc se comporta como malloc si el puntero original es NULL
-        fprintf(stderr, "Error: El puntero original es NULL.\n");
-         return NULL;
-    }
 
-    char *temp = malloc(strlen(from) + 1);
-    if (temp == NULL) {
-        fprintf(stderr, "Error: Fallo en la asignación de memoria temporal.\n");
-        return NULL;
-    }
-
-    char *newName = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
-    if (newName == NULL) {
-         fprintf(stderr, "Error: Fallo en realloc.\n");
-         free(temp);
-         return NULL;
-    }
-
-    bike->station[stationId - 1].nameStation = newName;
-    strcpy(bike->station[stationId - 1].nameStation, from);
-
-    free(temp);  // Liberar memoria temporal
-
-    return bike;
-}
-*/
 bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
     // Validar entradas
     if (bike == NULL || from == NULL) {
@@ -111,22 +82,6 @@ static int _strcasecmp(const char *s1, const char *s2)
     return toupper((unsigned char)*s1) - toupper((unsigned char)*s2);
 }
 
-//get day, year, month of the char date
-
-/*
-static int getDayOfWeek(int day, int month, int year) {
-    if (month < 3) {
-        month += 12;
-        year -= 1;
-    }
-    int k = year % 100;
-    int j = year / 100;
-    int dayOfWeek = (day + 13 * (month + 1) / 5 + k + k / 4 + j / 4 + 5 * j) % 7;
-    return dayOfWeek;
-}
-*/
-
-//hacer otro getDay para las horas
 
 static int getDay(const char *day) {
     struct tm tm;
@@ -244,7 +199,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
         }
         bike->dim_station = MAYOR(startId, endId);
     }
-    size_t newSize = MAYOR(startId, endId);
+    //size_t newSize = MAYOR(startId, endId);
 
     if (bike->station[startId-1].used == 0){
         bike->station[startId-1].nameStation = malloc(strlen(startDate)+1);
