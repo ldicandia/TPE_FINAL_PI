@@ -261,20 +261,20 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     }
     bike->station[startId-1].allTrips++;
 
-    char aux[11];
-    int i;
-    for(i = 0 ; i < 11 ; i++)
-        aux[i] = startDate[i];
-    
-    aux[i] = 0;
 
+    //DEBUGEAR ESTO, GETDAY RECIBE LA HORA EN VEZ DE LA FECHA 16:42:00 ?????
+    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+    char aux[11];
+    strncpy(aux, startDate, 10);
+    aux[10] = 0;
     size_t start = getDay(aux);
 
     char aux2[11];
-    for(i = 0 ; i < 11 ; i++)
-        aux2[i] = endDate[i];
-    
-    aux2[i] = 0;
+    strncpy(aux2, endDate, 10);
+    aux2[10] = 0;
     size_t end = getDay(aux2); 
 
 
