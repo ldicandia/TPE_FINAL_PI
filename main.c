@@ -7,6 +7,7 @@
 #include <ctype.h>
 #define SEMICOLONS 4
 #define LEN_HOURS 20
+#define MAX_NAME 50
 
 void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons);
 
@@ -163,7 +164,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", datetime, &startId, datetime, &endId, &isMember);
         if (result != 5) {
             fprintf(stderr, "Error parsing line: %s\n", actualRead);
-            continue; // O manejar el error como sea adecuado
+            exit(1);
         }
 
         // Extraer solo la fecha de las cadenas de fecha y hora
@@ -216,61 +217,16 @@ void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons){
 
     size_t stationId;
     char * token;
-    char * stationName;
+    char stationName[MAX_NAME];
+    
 
     while(fgets(actualRead, MAXCHAR, file) != NULL){
-       
-       //CASO CSV CANADA
-       if(!(*semiColons)){
-        //copia id
-        stationId = atoi(strtok(actualRead,";"));
-        
-        //copia name
-        if(token != NULL){
-            stationName = malloc((strlen(token)+1)); // * sizeof(char)
-            if(stationName != NULL){
-                strcpy(stationName, token);
-            }else{
-                fprintf(stderr, "Memory error");
-                exit(MEMO_ERR);
-            }
-        }else{
-            fprintf(stderr, "NULL token error");
-            exit(TOK_ERR);
+       int result = sscanf(actualRead, "%d;%49[^;]", &stationId, stationName);
+       if (result != 2) {
+            fprintf(stderr, "Error parsing line: %s\n", actualRead);
+            exit(1);
         }
-        
-        strtok(NULL, ";");//Salteo Latitud 
-        strtok(NULL, "\n"); //y longitud
-       }else{ //CASO CSV NYC
-
-            if(token != NULL){
-            stationName = malloc((strlen(token)+1)); // * sizeof(char)
-            if(stationName != NULL){
-                strcpy(stationName, token);
-            }else{
-                fprintf(stderr, "Memory error");
-                exit(MEMO_ERR);
-            }
-        }else{
-            fprintf(stderr, "NULL token error");
-            exit(TOK_ERR);
-        }
-        token = strtok(NULL,";");
-        strtok(NULL, ";");//Salteo Latitud 
-        strtok(NULL, "\n"); //y longitud
-        //copia id
-        stationId = atoi(strtok(actualRead,";"));
-       }
-        
-        bike = string_cpy(bike, stationName, stationId); //copia al adt el nombre de la estacion
-
-        if(bike == NULL){ 
-            fprintf(stderr, "Memory error");
-            exit(MEMO_ERR);
-        } 
-        bike = string_cpy(bike, stationName, stationId); 
-        free(stationName);
-
+        string_cpy(bike, stationName, stationId);
     }
 
     fclose(file);
