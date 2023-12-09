@@ -9,9 +9,9 @@
 #define LEN_HOURS 20
 #define MAX_NAME 50
 
-void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons);
+void nameReader(bikeADT bike, const char * inputFile, size_t * formatDetect);
 
-bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t * semiColons);
+bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t * formatDetect);
 
 void query1(bikeADT bike);
 void query2(bikeADT bike);
@@ -20,30 +20,30 @@ void query4(bikeADT bike);
 FILE * newFile(const char * inputFile);
 
 int main(int argc, char * argv[]){
-    size_t semiColons;
+    size_t formatDetect;
     size_t yearFrom=0, yearTo=0;
     
     bikeADT bike = new();
     
-    if (argc < 3){
+    if(argc < 3){
         fprintf(stderr, "Invalid arguments\n");
         exit(ARG_ERR);
     }
-    if (argc == 4){
+    if(argc == 4){
         yearFrom = atoi(argv[3]);
         yearTo = atoi(argv[3]);
     }
-    if (strcmp(argv[1], argv[2]) > 0){
-        bike = csvReader(argv[2], yearFrom, yearTo, &semiColons);
-        nameReader(bike, argv[1], &semiColons);
-    }else if (strcmp(argv[1], argv[2]) < 0){
-        bike = csvReader(argv[1], yearFrom, yearTo, &semiColons);
-        nameReader(bike, argv[2], &semiColons);
+    if(strcmp(argv[1], argv[2]) > 0){
+        bike = csvReader(argv[2], yearFrom, yearTo, &formatDetect);
+        nameReader(bike, argv[1], &formatDetect);
+    }else if(strcmp(argv[1], argv[2]) < 0){
+        bike = csvReader(argv[1], yearFrom, yearTo, &formatDetect);
+        nameReader(bike, argv[2], &formatDetect);
     }else{
         fprintf(stderr, "Invalid arguments order\n");
         exit(ARG_ERR);
     }
-    if (bike == NULL){
+    if(bike == NULL){
         fprintf(stderr, "Memory error");
         exit(MEMO_ERR);
     }
@@ -58,6 +58,8 @@ int main(int argc, char * argv[]){
 }
 
 void query1(bikeADT bike){
+    tripSort(bike);
+
     FILE * file = newFile("query1.html");
     if (file == NULL){
         fprintf(stderr, "Error creating file");
@@ -74,6 +76,7 @@ void query1(bikeADT bike){
 }
 
 void query2(bikeADT bike){
+    sortAlpha(bike);
     FILE * file = newFile("query2.html");
     if (file == NULL){
         fprintf(stderr, "Error creating file");
@@ -106,6 +109,7 @@ void query3(bikeADT bike){
 }   
 
 void query4(bikeADT bike){
+    sortAlpha(bike);
     FILE * file = newFile("query4.html");
     if (file == NULL){
         fprintf(stderr, "Error creating file");
@@ -131,9 +135,8 @@ void query4(bikeADT bike){
 //funcion que lee los archivos csv en cualquiera de los dos formatos y guarda los datos en variables
 
 
-bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *semiColons) {
+bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect) {
     FILE *file = fopen(inputFile, "r");
-
     if (file == NULL) {
         fprintf(stderr, "Error opening file %s\n", inputFile);
         exit(OPEN_ERR);
@@ -146,37 +149,36 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     }
 
     char actualRead[MAXCHAR];
-    (*semiColons) = 0;
-
-    // Omite la primera línear
     if (fgets(actualRead, sizeof(actualRead), file) == NULL) {
         perror("Error reading file");
         fclose(file);
-        return 0;
+        return NULL;
     }
 
-    // Código para extraer solo la fecha
+    // Determinar el formato basado en la primera línea (encabezado)
+    *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
+    
     char startDate[20], endDate[20];
     size_t startId, endId, isMember;
-    char datetime[LEN_HOURS];  // Para almacenar la fecha y hora temporalmente
 
     while (fgets(actualRead, MAXCHAR, file) != NULL) {
-        int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", datetime, &startId, datetime, &endId, &isMember);
-        if (result != 5) {
-            fprintf(stderr, "Error parsing line: %s\n", actualRead);
-            exit(1);
+        if (*formatDetect) {
+            // Formato CSV1
+            int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%*[^;];%zu", startDate, &startId, endDate, &endId, &isMember);
+            if (result != 5) {
+                fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
+                continue;  // O manejar el error de otra manera
+            }
+        } else {
+            // Formato CSV2
+            int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", startDate, &startId, endDate, &endId, &isMember);
+            if (result != 5) {
+                fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
+                continue;  // O manejar el error de otra manera
+            }
         }
-
-        // Extraer solo la fecha de las cadenas de fecha y hora
-        sscanf(datetime, "%10s", startDate);
-        sscanf(datetime, "%10s", endDate);
 
         putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
-
-        if (bike == NULL) {
-            fprintf(stderr, "Memory error\n");
-            exit(MEMO_ERR);
-        }
 
         size_t flagError = 0;
         addMatrix(bike, startId, endId, &flagError);
@@ -188,7 +190,6 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     }
 
     fclose(file);
-
     return bike;
 }
 
@@ -202,35 +203,30 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
 //327;Sanguinet / de Maisonneuve;45.513405;-73.562594
 
 
-void nameReader(bikeADT bike, const char * inputFile, size_t * semiColons){
+void nameReader(bikeADT bike, const char * inputFile, size_t * formatDetect){
     FILE * file = fopen(inputFile, "r");
 
-        if(file == NULL){
-            fprintf(stderr, "Error opeing file %s\n", inputFile);
-            exit(OPEN_ERR);
-        }
-    
+    if(file == NULL){
+        fprintf(stderr, "Error opeing file %s\n", inputFile);
+        exit(OPEN_ERR);
+    }    
        
     char actualRead[MAXCHAR];
 
     fscanf(file, "%s\n", actualRead); /* salta la primer linea */
 
     size_t stationId;
-    char * token;
     char stationName[MAX_NAME];
-    
 
     while(fgets(actualRead, MAXCHAR, file) != NULL){
-       int result = sscanf(actualRead, "%d;%49[^;]", &stationId, stationName);
-       if (result != 2) {
-            fprintf(stderr, "Error parsing line: %s\n", actualRead);
-            exit(1);
-        }
+       int result = sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
+       //if (result != 3) {
+         //   fprintf(stderr, "nameReader: Error parsing line %s\n", actualRead);
+           // exit(1);
+        //}
         string_cpy(bike, stationName, stationId);
     }
-
     fclose(file);
-
 }
 
 FILE * newFile(const char * inputFile){

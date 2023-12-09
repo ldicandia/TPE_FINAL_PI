@@ -50,8 +50,6 @@ size_t getOldestRoute(bikeADT bike, size_t pos);
 
 char * getOldestDateTime(bikeADT bike, size_t pos);
 
-void sortAlpha(bikeADT bike);
-
 /*query 3*/
 
 size_t getstartedTrips(bikeADT bike, int day, int * flag);
