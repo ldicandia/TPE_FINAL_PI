@@ -188,7 +188,6 @@ bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t
         if(result != 5){
             exit(1);
         }
-
         putStation(bike, startDate,startId, endDate, endId, isMember, yearFrom, yearTo);
 
         if (bike == NULL){
@@ -196,15 +195,12 @@ bikeADT csvReader(const char * inputFile, size_t yearFrom, size_t yearTo, size_t
             exit(MEMO_ERR);
         }
         
-
         addMatrix(bike, startId, endId, &flagError);
 
         if (flagError == MEMO_ERR){
             fprintf(stderr, "NULL token error");
             exit(TOK_ERR);
         }
-
-        
     }
     
     fclose(file);

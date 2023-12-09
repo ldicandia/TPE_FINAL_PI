@@ -243,7 +243,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     }
     size_t newSize = MAYOR(startId, endId);
 
-    if (bike->station[startId-1].nameStation == NULL){
+    if (bike->station[startId-1].used == 0){
         bike->station[startId-1].nameStation = malloc(strlen(startDate)+1);
         bike->station[startId-1].nameStation = strcpy(bike->station[startId-1].nameStation, startDate);
         bike->station[startId-1].idStation = startId;
@@ -279,7 +279,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
    
     if(bike->station[startId-1].oldest.oldestDateTime == NULL){
         bike->station[startId-1].oldest.oldestDateTime = malloc(strlen(startDate)+1);
-        bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId - 1].oldest.oldestDateTime, startDate);
+        bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId-1].oldest.oldestDateTime, startDate);
         bike->station[startId-1].oldest.oldestStationId = endId;
     }
     else if (strcmp(startDate, bike->station[startId-1].oldest.oldestDateTime) < 0){
@@ -315,16 +315,19 @@ char * getStationName(bikeADT bike, size_t pos){
 void tripSort(bikeADT bike){
     int k=0;
     for (size_t i=0; i < bike->dim_station ; i++){
-        if (bike->station[i].nameStation != NULL){
+        if (bike->station[i].used == 1){
             free(bike->station[k].nameStation);  // liberar la cadena original
             bike->station[k].nameStation = copyStr(bike->station[i].nameStation);
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
             bike->station[k].oldest = bike->station[i].oldest;
+            bike->station[k].most.mostPopRouteEndStation = copyStr(bike->station[i].most.mostPopRouteEndStation);
+            bike->station[k].most.mostPopRouteTrips = bike->station[i].most.mostPopRouteTrips;
             bike->station[k++].idStation = i+1;
-            bike->station[k++].used = 0;
+            bike->station[k++].used = 1;
         }    
+        bike->station[i].used == 0;
     }
     
     bike->station = realloc(bike->station, k * sizeof(TVecStation)); //Con este realloc eliminamos del vector todas las estaciones que tengan el used en 0.
