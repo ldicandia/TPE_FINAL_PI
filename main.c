@@ -6,7 +6,8 @@
 #include <time.h>
 #include <ctype.h>
 #define SEMICOLONS 4
-#define LEN_HOURS 20
+#define LEN_HOURS_MON 20
+#define LEN_HOURS_NYC 27
 #define MAX_NAME 50
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect);
@@ -159,15 +160,6 @@ void query4(bikeADT bike)
     fprintf(file, "</table>\n</body>\n</html>");
     fclose(file);
 }
-// ejemplo csv nyc
-// fecha alquiler          ; start id; fecha devolucion;       endId;  biketype;  m o c;
-// 2022-11-17 19:05:10.000000;489509;2022-11-17 19:07:30.000000;490309;classic_bike;member
-
-// ejemplo csv mon
-// fecha alquiler;   start id; fecha devolucion; endId ; m o c;
-// 2021-09-20 06:31:28;348;2021-09-20 07:02:22;332;1
-
-// funcion que lee los archivos csv en cualquiera de los dos formatos y guarda los datos en variables
 
 bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect)
 {
@@ -178,7 +170,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         exit(OPEN_ERR);
     }
 
-    bikeADT bike = new ();
+    bikeADT bike = new();
     if (bike == NULL)
     {
         fprintf(stderr, "Memory error\n");
@@ -193,57 +185,52 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         return NULL;
     }
 
-    // Determinar el formato basado en la primera línea (encabezado)
     *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
-
-    char startDate[20], endDate[20];
-    size_t startId, endId, isMember;
 
     while (fgets(actualRead, MAXCHAR, file) != NULL)
     {
         if (*formatDetect)
         {
-            // Formato CSV1
-            int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%*[^;];%zu", startDate, &startId, endDate, &endId, &isMember);
-            if (result != 5)
-            {
-                fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
-                exit(1); // O manejar el error de otra manera
+            char startDate[LEN_HOURS_NYC], endDate[LEN_HOURS_NYC];
+            size_t startId, endId;
+            
+            char member[5];
+            char biketype[13];
+            
+            sscanf(actualRead, "%26[^;];%zu;%26[^;];%zu;%12[^;];%4[^\n]", startDate, &startId, endDate, &endId, biketype, member);
+             
+            int isMember = 0;
+            if(member[0]=='m'){
+                isMember = 1;
             }
-        }
-        else
-        {
-            // Formato CSV2
-            int result = sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", startDate, &startId, endDate, &endId, &isMember);
-            if (result != 5)
-            {
-                fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
-                exit(1); // O manejar el error de otra manera
-            }
-        }
 
-        putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
+            putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
 
-        size_t flagError = 0;
-        addMatrix(bike, startId, endId, &flagError);
+            size_t flagError = 0;
+            addMatrix(bike, startId, endId, &flagError);
 
-        if (flagError == MEMO_ERR){
-            fprintf(stderr, "NULL token error\n");
+            if (flagError == MEMO_ERR)
+                fprintf(stderr, "NULL token error\n");
             exit(TOK_ERR);
         }
+        else{
+            char startDate[LEN_HOURS_MON], endDate[LEN_HOURS_MON];
+            size_t startId, endId, isMember;
+            sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", startDate, &startId, endDate, &endId, &isMember);
+            putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
+
+            size_t flagError = 0;
+            addMatrix(bike, startId, endId, &flagError);
+
+            if (flagError == MEMO_ERR){
+              fprintf(stderr, "NULL token error\n");
+              exit(TOK_ERR);
+            }
+        }
     }
-
-    fclose(file);
-    return bike;
+        fclose(file);
+        return bike;
 }
-
-// ejemplo csv nyc
-// nombre               ; latitud ; longitud ; id
-// River Ave & E 151 St;40.822217;-73.928939;796704
-
-// ejemplo csv mon
-// id  ; nombre ; latitud ;longitud
-// 327;Sanguinet / de Maisonneuve;45.513405;-73.562594
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect)
 {
@@ -257,18 +244,17 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect)
 
     char actualRead[MAXCHAR];
 
-    fscanf(file, "%s\n", actualRead); /* salta la primer linea */
-
+    fscanf(file, "%s\n", actualRead); 
     size_t stationId;
     char stationName[MAX_NAME];
 
     while (fgets(actualRead, MAXCHAR, file) != NULL)
     {
-        int result = sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
-        // if (result != 3) {
-        //    fprintf(stderr, "nameReader: Error parsing line %s\n", actualRead);
-        //  exit(1);
-        //}
+        if (*formatDetect){
+           sscanf(actualRead, "%49[^;];%*[^;];%*[^;];%zu", stationName, &stationId);
+        }else{
+        sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
+        }
         string_cpy(bike, stationName, stationId);
     }
 

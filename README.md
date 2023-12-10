@@ -8,7 +8,26 @@
 - _Lucas Di Candia 63212_
 
 #### CREACION DE EJECUTABLE
+    Compilacion:
+Para compilar, simplemente ejecute make en la terminal desde el directorio en el que se encuentra el archivo Makefile:
+    - make
+Esto generara el ejecutable: main.out
+
+Si desea compilar el programa, puede hacerlo poniendo:
+    - make main
 
 #### EJECUCION
+    Ejecucion
+Una vez que el programa este compilado, puede ejecutarlo desde la linea de comandos de la siguiente manera:
 
-#### PARA ELIMINAR ARCHIVOS
+    - ./main.out bikesMON.csv stationsMON.csv
+o sino: 
+    - ./main.out bikesNYC.csv stationsNYC.csv
+
+Por favor, asegurese de que los archivos CSV bikesMON.csv, stationsMON.csv, bikesNYC.csv y stationsNYC.csv esten en el mismo directorio que los ejecutables o proporcionar la ruta completa a los archivos.
+
+#### PARA ELIMINAR ARCHIVOS 
+    Limpieza
+Si desea limpiar los ejecutables y empezar de nuevo, puede usar el comando clean de la siguiente manera:
+    -make clean.
+Esto eliminara los archivos bikeSharingMON.out y bikeSharingNYC.out generados anteriormente.

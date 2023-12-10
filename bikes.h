@@ -6,7 +6,6 @@
 
 #define MAXCHAR 100
 
-enum errors{OK=0, ARG_ERR, OPEN_ERR, CREA_ERR, MEMO_ERR, TOK_ERR};
 /*
 tipos de errores:
 - ARG_ERR = error en la cantidad de argumentos
@@ -15,7 +14,12 @@ tipos de errores:
 - MEMO_ERR = error de creacion de memoria
 - TOK_ERR = error de token nulo
 - NEX_ERR = error al chequear si hay un proximo en el iterador
+- CPY_ERR = error de strcpy.
+- POS_ERR = pos > dim.
+- PAR_ERR = parsing liner error.
 */
+
+enum errors{OK=0, ARG_ERR, OPEN_ERR, CREA_ERR, MEMO_ERR, TOK_ERR, POS_ERR, PAR_ERR};
 
 typedef struct bikeCDT * bikeADT;
 

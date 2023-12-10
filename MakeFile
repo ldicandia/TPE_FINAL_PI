@@ -1,0 +1,10 @@
+CC = gcc
+ALL_CFLAGS = -Wall -pedantic -std=c99 -lm -g -fsanitize=address
+
+all: main
+
+main: main.c bikes.c
+    $(CC) $(ALL_CFLAGS) -o main.out $^
+
+clean: 
+    rm -f main.out
