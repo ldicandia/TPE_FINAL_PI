@@ -192,7 +192,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             if(member[0]=='m'){
                 isMember = 1;
             }
-            
+
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
             
             addMatrix(bike, startId, endId, &flagError);
@@ -234,7 +234,7 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
         if (*formatDetect){
            sscanf(actualRead, "%49[^;];%*[^;];%*[^;];%zu", stationName, &stationId);
         }else{
-        sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
+            sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
         }
         string_cpy(bike, stationName, stationId);
     }

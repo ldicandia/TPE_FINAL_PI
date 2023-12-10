@@ -76,5 +76,9 @@ void addMost(bikeADT bike);
 
 void freeADT(bikeADT bike);
 
+/*query 5*/
+
+
+
 #endif
 
