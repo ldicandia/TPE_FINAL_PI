@@ -62,9 +62,9 @@ bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
     }
 
     // Actualizar el puntero y copiar la nueva cadena
-    bike->station[stationId - 1].nameStation = realloc(bike->station[stationId - 1].nameStation, strlen(from) + 1);
-    char * aux =strcpy(bike->station[stationId-1].nameStation, from);
-    free(aux);
+    bike->station[stationId - 1].nameStation = realloc(bike->station[stationId - 1].nameStation, strlen(from)+1);
+    char * aux = strcpy(bike->station[stationId-1].nameStation, from);
+    //free(aux); 
 
     return bike;
 }
@@ -131,11 +131,11 @@ static char * copyStr(const char * s) {
         fprintf(stderr, "Falla cpy");
         exit(1);
     }
-    char * aux = malloc(strlen(s)+1);
-    if ( aux==NULL) {
+    char * res = malloc(strlen(s)+1);
+    if (res == NULL) 
         return NULL;
-    }
-    return strcpy(aux, s);
+    
+    return strcpy(res, s);
 }
 
 /*-----------------------LOAD--------------------------------*/
@@ -255,6 +255,7 @@ void tripSort(bikeADT bike){
             free(bike->station[k].nameStation);  // liberar la cadena original
             if(bike->station[i].nameStation != NULL){
                 bike->station[k].nameStation = copyStr(bike->station[i].nameStation);
+                //free(bike->station[i].nameStation);
             }
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
@@ -262,15 +263,14 @@ void tripSort(bikeADT bike){
             bike->station[k].oldest = bike->station[i].oldest;
             
             if(bike->station[i].most.mostPopRouteEndStation != NULL){
-                free(bike->station[k].most.mostPopRouteEndStation);
                 bike->station[k].most.mostPopRouteEndStation = copyStr(bike->station[i].most.mostPopRouteEndStation);
-
+                free(bike->station[i].most.mostPopRouteEndStation);
             }
             //agregarIdMost
             bike->station[k].most.mostPopRouteTrips = bike->station[i].most.mostPopRouteTrips;
             bike->station[k].idStation = i+1;
             bike->station[k++].used = 1;
-        }    
+        }
         bike->station[i].used = 0;
     }
     
@@ -382,17 +382,18 @@ void addMatrix(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ 
     }
 }
 
-void addMost(bikeADT bike, size_t stationId){
+void addMost(bikeADT bike){
     size_t aux = 0;
     for(int i = 1 ; i < bike->resv_station ; i++){
         if(bike->station[i-1].used){
-            free(bike->station[i - 1].most.mostPopRouteEndStation);
-            aux = bike->station[i - 1].most.mostPopRouteEndStationId;
-            bike->station[i-1].most.mostPopRouteEndStation = copyStr(bike->station[aux-1].nameStation); 
+            aux = bike->station[i-1].most.mostPopRouteEndStationId;
+            //bike->station[i-1].most.mostPopRouteEndStation = copyStr(bike->station[aux-1].nameStation); 
+            bike->station[i-1].most.mostPopRouteEndStation = malloc(strlen(bike->station[aux-1].nameStation)+1);
+            strcpy(bike->station[i-1].most.mostPopRouteEndStation, bike->station[aux-1].nameStation);
         }
     }
-
 }
+
 
 char * getMostPopRouteEndStation(bikeADT bike, size_t pos){
     if(bike->station[pos].most.mostPopRouteEndStation == NULL){ //cambiar por exit 1
@@ -419,6 +420,7 @@ size_t getMostPopRouteTrips(bikeADT bike, size_t pos){
 void sortAlpha(bikeADT bike){
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
 }
+
 /*----------------------FREES-----------------------------*/
 
 void freeADT(bikeADT bike){ //libera toda la memoria

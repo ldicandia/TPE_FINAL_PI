@@ -208,7 +208,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             if (result != 5)
             {
                 fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
-                continue; // O manejar el error de otra manera
+                exit(1); // O manejar el error de otra manera
             }
         }
         else
@@ -218,7 +218,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             if (result != 5)
             {
                 fprintf(stderr, "csvReader: Error parsing line %s\n", actualRead);
-                continue; // O manejar el error de otra manera
+                exit(1); // O manejar el error de otra manera
             }
         }
 
@@ -227,8 +227,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         size_t flagError = 0;
         addMatrix(bike, startId, endId, &flagError);
 
-        if (flagError == MEMO_ERR)
-        {
+        if (flagError == MEMO_ERR){
             fprintf(stderr, "NULL token error\n");
             exit(TOK_ERR);
         }
@@ -273,7 +272,7 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect)
         string_cpy(bike, stationName, stationId);
     }
 
-    addMost(bike, stationId);
+    addMost(bike);
 
     fclose(file);
 }
