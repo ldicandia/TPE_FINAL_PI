@@ -26,8 +26,3 @@ o sino:
 
 Por favor, asegurese de que los archivos CSV bikesMON.csv, stationsMON.csv, bikesNYC.csv y stationsNYC.csv esten en el mismo directorio que los ejecutables o proporcionar la ruta completa a los archivos.
 
-#### PARA ELIMINAR ARCHIVOS 
-    Limpieza
-Si desea limpiar los ejecutables y empezar de nuevo, puede usar el comando clean de la siguiente manera:
-    -make clean.
-Esto eliminara los archivos bikeSharingMON.out y bikeSharingNYC.out generados anteriormente.
