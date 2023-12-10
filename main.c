@@ -27,33 +27,27 @@ int main(int argc, char *argv[])
 
     bikeADT bike = new ();
 
-    if (argc < 3)
-    {
+    if (argc < 3){
         fprintf(stderr, "Invalid arguments\n");
         exit(ARG_ERR);
     }
-    if (argc == 4)
-    {
+    if (argc == 4){
         yearFrom = atoi(argv[3]);
         yearTo = atoi(argv[3]);
     }
-    if (strcmp(argv[1], argv[2]) > 0)
-    {
+    if (strcmp(argv[1], argv[2]) > 0){
         bike = csvReader(argv[2], yearFrom, yearTo, &formatDetect);
         nameReader(bike, argv[1], &formatDetect);
     }
-    else if (strcmp(argv[1], argv[2]) < 0)
-    {
+    else if (strcmp(argv[1], argv[2]) < 0){
         bike = csvReader(argv[1], yearFrom, yearTo, &formatDetect);
         nameReader(bike, argv[2], &formatDetect);
     }
-    else
-    {
+    else{
         fprintf(stderr, "Invalid arguments order\n");
         exit(ARG_ERR);
     }
-    if (bike == NULL)
-    {
+    if (bike == NULL){
         fprintf(stderr, "Memory error");
         exit(MEMO_ERR);
     }
@@ -164,62 +158,55 @@ void query4(bikeADT bike)
 bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect)
 {
     FILE *file = fopen(inputFile, "r");
-    if (file == NULL)
-    {
+    if (file == NULL){
         fprintf(stderr, "Error opening file %s\n", inputFile);
         exit(OPEN_ERR);
     }
 
     bikeADT bike = new();
-    if (bike == NULL)
-    {
+    if (bike == NULL){
         fprintf(stderr, "Memory error\n");
         exit(MEMO_ERR);
     }
 
     char actualRead[MAXCHAR];
-    if (fgets(actualRead, sizeof(actualRead), file) == NULL)
-    {
+    if (fgets(actualRead, sizeof(actualRead), file) == NULL){
         perror("Error reading file");
         fclose(file);
         return NULL;
     }
 
     *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
+    size_t flagError = 0;
 
-    while (fgets(actualRead, MAXCHAR, file) != NULL)
-    {
-        if (*formatDetect)
-        {
+    while (fgets(actualRead, MAXCHAR, file) != NULL){
+        if (*formatDetect){
             char startDate[LEN_HOURS_NYC], endDate[LEN_HOURS_NYC];
             size_t startId, endId;
-            
-            char member[5];
-            char biketype[13];
-            
-            sscanf(actualRead, "%26[^;];%zu;%26[^;];%zu;%12[^;];%4[^\n]", startDate, &startId, endDate, &endId, biketype, member);
-             
+
+            char member[7];  
+
+            sscanf(actualRead, "%26[^;];%zu;%26[^;];%zu;%*[^;];%6[^\n]", startDate, &startId, endDate, &endId, member);
+
             int isMember = 0;
             if(member[0]=='m'){
                 isMember = 1;
             }
-
+            
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
-
-            size_t flagError = 0;
+            
             addMatrix(bike, startId, endId, &flagError);
 
-            if (flagError == MEMO_ERR)
+            if (flagError == MEMO_ERR){
                 fprintf(stderr, "NULL token error\n");
-            exit(TOK_ERR);
-        }
-        else{
+                exit(flagError);
+            }
+        }else{
             char startDate[LEN_HOURS_MON], endDate[LEN_HOURS_MON];
             size_t startId, endId, isMember;
             sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", startDate, &startId, endDate, &endId, &isMember);
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
 
-            size_t flagError = 0;
             addMatrix(bike, startId, endId, &flagError);
 
             if (flagError == MEMO_ERR){
@@ -228,28 +215,22 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             }
         }
     }
-        fclose(file);
-        return bike;
+    fclose(file);
+    return bike;
 }
 
-void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect)
-{
+void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     FILE *file = fopen(inputFile, "r");
-
-    if (file == NULL)
-    {
+    if (file == NULL){
         fprintf(stderr, "Error opeing file %s\n", inputFile);
         exit(OPEN_ERR);
     }
-
     char actualRead[MAXCHAR];
-
     fscanf(file, "%s\n", actualRead); 
     size_t stationId;
     char stationName[MAX_NAME];
 
-    while (fgets(actualRead, MAXCHAR, file) != NULL)
-    {
+    while (fgets(actualRead, MAXCHAR, file) != NULL){
         if (*formatDetect){
            sscanf(actualRead, "%49[^;];%*[^;];%*[^;];%zu", stationName, &stationId);
         }else{
@@ -257,14 +238,11 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect)
         }
         string_cpy(bike, stationName, stationId);
     }
-
     addMost(bike);
-
     fclose(file);
 }
 
-FILE *newFile(const char *inputFile)
-{
+FILE *newFile(const char *inputFile){
     FILE *new = fopen(inputFile, "wt");
     return new;
 }
