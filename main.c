@@ -6,9 +6,7 @@
 #include <time.h>
 #include <ctype.h>
 #define SEMICOLONS 4
-#define LEN_HOURS_MON 20
-#define LEN_HOURS_NYC 27
-#define MAX_NAME 50
+
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect);
 
@@ -179,63 +177,101 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
     size_t flagError = 0;
 
-    while (fgets(actualRead, MAXCHAR, file) != NULL){
-        if (*formatDetect){
-            char startDate[LEN_HOURS_NYC], endDate[LEN_HOURS_NYC];
-            size_t startId, endId;
+    char *startDate;
+    size_t startId;
+    char *endDate;
+    size_t endId;
+    int isMember;
 
-            char member[7];  
+        while (fgets(actualRead, MAXCHAR, file) != NULL){
+            if (*formatDetect){
+                char *token = strtok(actualRead, ".");
+                startDate = token;
+                token = strtok(NULL, ";");
 
-            sscanf(actualRead, "%26[^;];%zu;%26[^;];%zu;%*[^;];%6[^\n]", startDate, &startId, endDate, &endId, member);
+                token = strtok(NULL, ";");
+                startId = strtoul(token, NULL, 10);
 
-            int isMember = 0;
-            if(member[0]=='m'){
-                isMember = 1;
+                token = strtok(NULL, ".");
+                endDate = token;
+                token = strtok(NULL, ";");
+
+                token = strtok(NULL, ";");
+                endId = strtoul(token, NULL, 10);
+
+               
+                token = strtok(NULL, ";");
+
+                token = strtok(NULL, ";");
+                isMember = strcmp(token, "member") == 0 ? 1 : 0;
+
+                
+            }else{ 
+
+                char *token = strtok(actualRead, ";");
+                startDate = token;
+
+                token=strtok(NULL, ";");
+                startId = strtoul(token, NULL, 10);
+
+                token = strtok(NULL, ";");
+                endDate = token;
+
+                token = strtok(NULL, ";");
+                endId = strtoul(token, NULL, 10);
+
+                token = strtok(NULL, ";");
+                isMember = strtoul(token, NULL, 10);
+
+                
             }
-
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
-            
-            addMatrix(bike, startId, endId, &flagError);
-
-            if (flagError == MEMO_ERR){
-                fprintf(stderr, "NULL token error\n");
-                exit(flagError);
-            }
-        }else{
-            char startDate[LEN_HOURS_MON], endDate[LEN_HOURS_MON];
-            size_t startId, endId, isMember;
-            sscanf(actualRead, "%19[^;];%zu;%19[^;];%zu;%zu", startDate, &startId, endDate, &endId, &isMember);
-            putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
 
             addMatrix(bike, startId, endId, &flagError);
-
-            if (flagError == MEMO_ERR){
-              fprintf(stderr, "NULL token error\n");
-              exit(TOK_ERR);
-            }
         }
-    }
+
     fclose(file);
     return bike;
 }
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     FILE *file = fopen(inputFile, "r");
+    
     if (file == NULL){
         fprintf(stderr, "Error opeing file %s\n", inputFile);
         exit(OPEN_ERR);
     }
+    
     char actualRead[MAXCHAR];
     fscanf(file, "%s\n", actualRead); 
+
     size_t stationId;
-    char stationName[MAX_NAME];
+    char * stationName;
 
     while (fgets(actualRead, MAXCHAR, file) != NULL){
         if (*formatDetect){
-           sscanf(actualRead, "%49[^;];%*[^;];%*[^;];%zu", stationName, &stationId);
-        }else{
-            sscanf(actualRead, "%zu;%49[^;]", &stationId, stationName);
+            char *token = strtok(actualRead, ";");
+            stationName=token;
+
+            token=strtok(NULL, ";");
+            token = strtok(NULL, ";");
+
+            token = strtok(NULL, ";");
+            stationId = strtoul(token, NULL, 10);
+        
+   
         }
+        else
+        {
+            char *token = strtok(actualRead, ";");
+            stationId = strtoul(token, NULL, 10);
+
+            token=strtok(NULL, ";");
+            stationName=token;
+
+            token=strtok(NULL, "\n");
+        }
+
         string_cpy(bike, stationName, stationId);
     }
     addMost(bike);
