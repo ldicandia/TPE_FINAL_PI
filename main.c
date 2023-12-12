@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     query1(bike);
     query2(bike);
     query3(bike);
-    query4(bike);
+    //query4(bike);
 
     freeADT(bike);
 
@@ -203,7 +203,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
                 token = strtok(NULL, ";");
 
                 token = strtok(NULL, ";");
-                isMember = strcmp(token, "member") == 0 ? 1 : 0;
+                isMember = (token[0] == 'm'); 
 
                 
             }else{ 
@@ -227,7 +227,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             }
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
 
-            addMatrix(bike, startId, endId, &flagError);
+            //addMatrix(bike, startId, endId, &flagError);
         }
 
     fclose(file);
@@ -274,7 +274,7 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
 
         string_cpy(bike, stationName, stationId);
     }
-    addMost(bike);
+    //addMost(bike);
     fclose(file);
 }
 
