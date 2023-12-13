@@ -127,8 +127,7 @@ void query3(bikeADT bike)
     fclose(file);
 }
 
-void query4(bikeADT bike)
-{
+void query4(bikeADT bike){
     sortAlpha(bike);
     FILE *file = newFile("query4.html");
     

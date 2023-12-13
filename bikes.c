@@ -63,7 +63,7 @@ typedef struct q3{
 //query 5
 
 typedef struct stations{
-    char * nameStation; ; 
+    char * nameStation;
     size_t circularTrips; 
 }stations; 
 
@@ -486,8 +486,9 @@ char * getMostPopRouteEndStation(bikeADT bike, size_t pos){ //retorna el nombre 
     }
 
     if( bike->station[pos].most_vec[0].endStation == NULL){
-        fprintf(stderr, "Passing NULL bike getStationName");
-        exit(POS_ERR);
+        fprintf(stderr, "Passing NULL bike MOSTPOPULAR StationName");
+        //exit(POS_ERR);
+        return NULL;
     }
 
     return copyStr(bike->station[pos].most_vec[0].endStation);
@@ -506,6 +507,7 @@ void freeADT(bikeADT bike){ //libera toda la memoria
     for (size_t i = 0; i < bike->dim_station; i++){
         free(bike->station[i].nameStation);
         free(bike->station[i].oldest.oldestDateTime);
+        free(bike->station[i].most_vec[0].endStation);
         free(bike->station[i].most_vec);
     }
     free(bike->station);
