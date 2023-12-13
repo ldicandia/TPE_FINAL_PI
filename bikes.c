@@ -82,10 +82,10 @@ typedef struct bikeCDT{
 bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
     if (bike == NULL || from == NULL) {
         fprintf(stderr, "Error: Entrada nula.\n");
-        return NULL;
+        exit(1);
     }
-    free(bike->station[stationId-1].nameStation);
-    bike->station[stationId-1].nameStation = realloc(bike->station[stationId-1].nameStation, strlen(from)+1);
+    
+    bike->station[stationId-1].nameStation = malloc(strlen(from)+1);
     strcpy(bike->station[stationId-1].nameStation, from);
     
 
@@ -300,10 +300,10 @@ void tripSort(bikeADT bike){
                 printf("TRIPS: %zu\n", bike->station[i].most_vec[0].endStationTrips);
                 printf("TRIPS 2: %zu\n", bike->station[i].most_vec[1].endStationTrips);
 
-                free(bike->station[k].most_vec[0].endStation);
+                
                  if(bike->station[i].most_vec[0].endStation != NULL){
-                    free(bike->station[k].most_vec[0].endStation);
                     bike->station[k].most_vec = realloc(bike->station[k].most_vec, 1*sizeof(TVecPopular));
+                    bike->station[k].most_vec[0].endStation = NULL;
                     bike->station[k].most_vec[0].endStation = copyStr(bike->station[i].most_vec[0].endStation);
                  }
                 bike->station[k].most_vec[0].endStationId = bike->station[i].most_vec[0].endStationId;

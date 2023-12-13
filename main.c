@@ -250,6 +250,8 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     size_t stationId;
     char * stationName;
 
+
+    int line = 0;
     while (fgets(actualRead, MAXCHAR, file) != NULL){
         if (*formatDetect){
             char *token = strtok(actualRead, ";");
@@ -269,6 +271,13 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
             stationName=token;
 
             token=strtok(NULL, "\n");
+        }
+
+        printf("line = %d\n", ++line);
+
+        if(stationName == NULL){
+            fprintf(stderr, "station name NULL");
+            exit(1);
         }
 
         string_cpy(bike, stationName, stationId);
