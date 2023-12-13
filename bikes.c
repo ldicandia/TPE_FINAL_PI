@@ -414,12 +414,12 @@ void getMostPopularVector(bikeADT bike, size_t stationId){
 //agrega al vector los endId
 void addVec(bikeADT bike, size_t startId, size_t endId){ 
 	if(startId != endId){
-		if(bike->station[startId-1].dim_most == bike->station[startId-1].resv_most ){
+		if(bike->station[startId-1].dim_most == bike->station[startId-1].resv_most){
 			bike->station[startId-1].most_vec = realloc(bike->station[startId-1].most_vec, (bike->station[startId-1].resv_most + BLOCK)*sizeof(TVecPopular));
 			bike->station[startId-1].resv_most =+ BLOCK;
 		}
 		int i;
-		for(i = 0 ; i < bike->station[startId-1].dim_most ; i++){
+		for(i = 0 ; i < bike->station[startId-1].dim_most + 1 ; i++){
 			if(bike->station[startId-1].most_vec[i].endStationId == endId){
 				bike->station[startId-1].most_vec[i].endStationTrips++;
 				return;
@@ -467,7 +467,7 @@ void addNameToVec(bikeADT bike, size_t startId){
     if(!bike->station[startId-1].dim_most){
         return;
     }
-    if(!bike->station[startId-1].dim_most == 1){
+    if(!(bike->station[startId-1].dim_most == 1)){
         bike->station[startId-1].most_vec[0].endStation = bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation; //copyStr
         return;
     }
