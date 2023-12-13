@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define MAXCHAR 100
+#define MAXCHAR 200
 
 /*
 tipos de errores:
@@ -34,6 +34,8 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId);
 
 void freeADT(bikeADT bike);
+
+char * copyStr(const char * s);
 
 /*query 1*/
 char * getStationName(bikeADT bike, size_t pos);

@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     query1(bike);
     query2(bike);
     query3(bike);
-    //query4(bike);
+    query4(bike);
 
     freeADT(bike);
 
@@ -174,7 +174,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         return NULL;
     }
 
-    *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
+    *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0; //NYC 1  - MON 0
     //size_t flagError = 0;
 
     char *startDate;
@@ -250,34 +250,40 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     size_t stationId;
     char * stationName;
 
-
-    int line = 0;
     while (fgets(actualRead, MAXCHAR, file) != NULL){
+        
+        //caso NYC
         if (*formatDetect){
             char *token = strtok(actualRead, ";");
-            stationName=token;
-
-            token=strtok(NULL, ";");
+            if(token != NULL){
+                stationName = malloc((strlen(token)+1));
+                strcpy(stationName, token);
+            }else{
+                fprintf(stderr, "token name NULL");
+                exit(1);
+            }
+            token = strtok(NULL, ";");
             token = strtok(NULL, ";");
 
-            token = strtok(NULL, ";");
+            token = strtok(NULL, "\n");
             stationId = strtoul(token, NULL, 10);
-        }else
-        {
-            char *token = strtok(actualRead, ";");
-            stationId = strtoul(token, NULL, 10);
-
-            token=strtok(NULL, ";");
-            stationName=token;
-
-            token=strtok(NULL, "\n");
         }
+        //caso MON
+        else{
+            char *token = strtok(actualRead, ";");
+            stationId = atoi(token);
 
-        printf("line = %d\n", ++line);
+            token = strtok(NULL, ";");
 
-        if(stationName == NULL){
-            fprintf(stderr, "station name NULL");
-            exit(1);
+            if(token != NULL){
+                stationName = malloc((strlen(token)+1));
+                strcpy(stationName, token);
+            }else{
+                fprintf(stderr, "token name NULL");
+                exit(1);
+            }
+
+            token = strtok(NULL, "\n");
         }
 
         string_cpy(bike, stationName, stationId);
