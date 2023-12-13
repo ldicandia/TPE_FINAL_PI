@@ -183,27 +183,27 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     size_t endId;
     int isMember;
 
-        while (fgets(actualRead, MAXCHAR, file) != NULL){
-            if (*formatDetect){
-                char *token = strtok(actualRead, ".");
-                startDate = token;
-                token = strtok(NULL, ";");
+    while (fgets(actualRead, MAXCHAR, file) != NULL){
+        if (*formatDetect){
+            char *token = strtok(actualRead, ".");
+            startDate = token;
+            token = strtok(NULL, ";");
 
-                token = strtok(NULL, ";");
-                startId = strtoul(token, NULL, 10);
+            token = strtok(NULL, ";");
+            startId = strtoul(token, NULL, 10);
 
-                token = strtok(NULL, ".");
-                endDate = token;
-                token = strtok(NULL, ";");
+            token = strtok(NULL, ".");
+            endDate = token;
+            token = strtok(NULL, ";");
 
-                token = strtok(NULL, ";");
-                endId = strtoul(token, NULL, 10);
+            token = strtok(NULL, ";");
+            endId = strtoul(token, NULL, 10);
 
                
-                token = strtok(NULL, ";");
+            token = strtok(NULL, ";");
 
-                token = strtok(NULL, ";");
-                isMember = (token[0] == 'm'); 
+            token = strtok(NULL, ";");
+            isMember = (token[0] == 'm'); 
 
                 
             }else{ 
@@ -226,9 +226,11 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
                 
             }
             putStation(bike, startDate, startId, endDate, endId, isMember, yearFrom, yearTo);
+            
 
-            //addMatrix(bike, startId, endId, &flagError);
-        }
+    }
+   
+    sortMostPopularVec(bike);
 
     fclose(file);
     return bike;

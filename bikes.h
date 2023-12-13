@@ -68,6 +68,7 @@ char * getDayOfTheWeek(size_t day);
 
 /*query 4*/
 
+void sortMostPopularVec(bikeADT bike);
 
 void sortAlpha(bikeADT bike);
 
