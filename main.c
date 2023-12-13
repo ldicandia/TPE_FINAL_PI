@@ -175,7 +175,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     }
 
     *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0;
-    size_t flagError = 0;
+    //size_t flagError = 0;
 
     char *startDate;
     size_t startId;
@@ -258,10 +258,7 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
 
             token = strtok(NULL, ";");
             stationId = strtoul(token, NULL, 10);
-        
-   
-        }
-        else
+        }else
         {
             char *token = strtok(actualRead, ";");
             stationId = strtoul(token, NULL, 10);
@@ -273,10 +270,17 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
         }
 
         string_cpy(bike, stationName, stationId);
+    }    
+
+    for(int i = 0 ; i < getResv(bike) ; i++){
+        if(getUsed(bike, i)){
+            addNameToVec(bike, i);
+        }
     }
-    //addMost(bike);
+    
     fclose(file);
 }
+
 
 FILE *newFile(const char *inputFile){
     FILE *new = fopen(inputFile, "wt");

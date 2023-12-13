@@ -6,25 +6,29 @@
 #include <time.h>
 
 #define MAX_DATE 10
+#define BLOCK 20
 #define WEEKS 7
 #define MAYOR(a,b) ((a)>(b)?(a):(b))
 
 enum days_{DOM=0, LUN, MAR, MIE, JUE, VIE, SAB};
 
-
+ //query 2
 typedef struct oldest{ 
     char * oldestDateTime;
     size_t oldestStationId;
 }TOldest;
 
+//query 4//
+/*
 typedef struct popular{
     char * endStation;
     size_t endStationId; 
     size_t endStationTrips;
     struct popular * tail;
-}TMostPopular;
+}TPopularNode;
 
-typedef TMostPopular * TPopular; 
+typedef TPopularNode * TPopularList; 
+*/
 
 typedef struct vecpopular{
     char * endStation;
@@ -47,14 +51,18 @@ typedef struct vecStation{
     TOldest oldest;
     
     //query 4
-    TPopular most; 
-    TVecPopular most_vec;
-    size_t size_most;
 
-
+    //TPopularList most; 
+    TVecPopular * most_vec;
+    size_t dim_most; 
+    size_t resv_most;
+    
+    //query5 
     size_t circularTrips; //esto nos sirve para la query 5.
 }TVecStation;
 
+
+//query 3
 typedef struct q3{ 
     size_t startedTrips;
     size_t endedTrips;
@@ -164,6 +172,11 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
             bike->station[i].oldest.oldestStationId = 0;
             bike->station[i].oldest.oldestDateTime = NULL;
             bike->station[i].used = 0;
+
+            bike->station[i].most_vec = NULL;
+            bike->station[i].dim_most = 0;
+            bike->station[i].resv_most = 0;
+
             
             for(int j = 0; j < WEEKS ; j++){
                 bike->qtyPerDay[j].endedTrips = 0;
@@ -180,7 +193,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
         bike->dim_station++;
     }
 
-    //aumentamos contadores de cantidad de viajes
+    //query 1
     if(isMember){
         bike->station[startId-1].memberTrips++;
     }else{
@@ -188,7 +201,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     }
     bike->station[startId-1].allTrips++;
 
-    //aumento cantida de viaje seun el dia de la semana
+    //query 3
     char aux[MAX_DATE + 1];
     strncpy(aux, startDate, MAX_DATE);
     aux[MAX_DATE] = 0;
@@ -202,6 +215,8 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     bike->qtyPerDay[start].startedTrips++;  
     bike->qtyPerDay[end].endedTrips++;
 
+    //query 2
+
     //se actualiza el oldest time y el oldest endId
     if(bike->station[startId-1].oldest.oldestDateTime == NULL){
         bike->station[startId-1].oldest.oldestDateTime = malloc(strlen(startDate)+1);
@@ -212,12 +227,26 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
         bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId-1].oldest.oldestDateTime, startDate);
         bike->station[startId-1].oldest.oldestStationId = endId;
     }
+
+    //query 4
+
+    addVec(bike, startId, endId);
+
+    //query 5
 }
 
 //query 1
 
 size_t getRealDim(bikeADT bike){
     return bike->dim_station;
+}
+
+size_t getResv(bikeADT bike){
+    return bike->resv_station;
+}
+
+size_t getUsed(bikeADT bike, size_t idx){
+    return bike->station[idx].used;
 }
 
 size_t getMemberTrips(bikeADT bike, size_t pos){
@@ -265,16 +294,18 @@ void tripSort(bikeADT bike){
             bike->station[k].oldest = bike->station[i].oldest;
             
             
-            if(bike->station[i].most.mostPopRouteEndStation != NULL){
-                bike->station[k].most.mostPopRouteEndStation = copyStr(bike->station[i].most.mostPopRouteEndStation);
+            if(bike->station[i].dim_most != 0){
+                bike->station[k].dim_most = bike->station[i].dim_most;
+                for(int j = 0 ; j < bike->station[k].dim_most ; j++){
+                    bike->station[k].most_vec[j].endStation = copyStr(getStationName(bike, bike->station[k].most_vec[j].endStationId));
+                    bike->station[k].most_vec[j].endStationId = bike->station[i].most_vec[j].endStationId;
+                }
             }
-            bike->station[k].most.mostPopRouteTrips = bike->station[i].most.mostPopRouteTrips;
             bike->station[k].idStation = i+1;
             bike->station[k++].used = 1;
         }
         bike->station[i].used = 0;
     }
-    
     bike->station = realloc(bike->station, k*sizeof(TVecStation)); 
     bike->dim_station = bike->resv_station = k;
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare);
@@ -326,9 +357,10 @@ char * getDayOfTheWeek(size_t day){
 
 //funcion que agrega los finales de viaje (endId, endName, cantTrips)
 
-static TPopular addListRec(TPopular list, size_t endId, size_t cantFirst, TPopular * flag){
+/*
+static TPopularList addListRec(TPopularList list, size_t endId, size_t cantFirst, TPopularList * flag){
     if(list == NULL){
-        TPopular aux = calloc(1, sizeof(TMostPopular));         
+        TPopularList aux = calloc(1, sizeof(TPopularNode));         
         aux->endStationId = endId;                               
         aux->endStationTrips++;                                   
         aux->tail = NULL;
@@ -339,14 +371,11 @@ static TPopular addListRec(TPopular list, size_t endId, size_t cantFirst, TPopul
         list->endStationTrips++;
         return list; 
     }
-    list->tail = addListRec(list->tail,  endId); 
+    list->tail = addListRec(list->tail,  endId, *flag); 
     return list;
 }
 
-//comparo con el endId para que sea mas eficiente. Hay que modificar el read.
-void addList(bikeADT bike, size_t startId, size_t endId, size_t * flagError){ 
-    //ver temas de validacion y flag;      
-
+void addList(bikeADT bike, size_t startId, size_t endId, size_t * flagError){     
     if(startId == endId){
         bike->station[startId-1].circularTrips++; 
     }else{
@@ -354,17 +383,17 @@ void addList(bikeADT bike, size_t startId, size_t endId, size_t * flagError){
     }
 }
 
-TVecMostPopular * listToArray(TMostPopular list, size_t size) {
-    TPopular current = list;
+static TVecPopular * listToArray(TPopularList list, size_t size) {
+    TPopularList current = list;
 
-    TVecPopular * arr = malloc(size * sizeof(TVecMostPopular));
+    TVecPopular * arr = malloc(size * sizeof(TVecPopular));
     if (arr == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
 
     for (int i = 0 ; i < size ; i++) {
-        arr[i].endStationTrips = current->endStationTrips
+        arr[i].endStationTrips = current->endStationTrips;
         arr[i].endStationId = current->endStationId;
         arr[i].endStation = NULL;
         current = current->tail;
@@ -373,28 +402,96 @@ TVecMostPopular * listToArray(TMostPopular list, size_t size) {
     return arr;
 }
 
+void getMostPopularVector(bikeADT bike, size_t stationId){
+    bike->station[stationId-1].most_vec = listToArray(bike->station[stationId-1].most, bike->station[stationId-1].size_most);
+    qsort(bike->station[stationId-1].most_vec, bike->station[stationId-1].size_most, sizeof(TVecPopular), compare_most); //hacer el compare 
+}
+*/
+
+/*------------------ALTERNATIVA QUERY 4 -------------------*/ 
 
 
-char * getMostPopRouteEndStation(bikeADT bike, size_t pos){
-    if(bike->station[pos].most.mostPopRouteEndStation == NULL){ 
-        return NULL;
+//agrega al vector los endId
+void addVec(bikeADT bike, size_t startId, size_t endId){ 
+	if(startId != endId){
+		if(bike->station[startId-1].dim_most == bike->station[startId-1].resv_most ){
+			bike->station[startId-1].most_vec = realloc(bike->station[startId-1].most_vec, (bike->station[startId-1].resv_most + BLOCK)*sizeof(TVecPopular));
+			bike->station[startId-1].resv_most =+ BLOCK;
+		}
+		int i;
+		for(i = 0 ; i < bike->station[startId-1].dim_most ; i++){
+			if(bike->station[startId-1].most_vec[i].endStationId == endId){
+				bike->station[startId-1].most_vec[i].endStationTrips++;
+				return;
+			}
+		}
+        bike->station[startId-1].most_vec[i].endStation = NULL;
+        bike->station[startId-1].most_vec[i].endStationId = endId;
+		bike->station[startId-1].most_vec[i].endStationTrips++;
+		bike->station[startId-1].dim_most++;
+		return;
+	}
+}
+
+static int compare_most(const void *a, const void *b){
+    TVecPopular *station1 = (TVecPopular *)a;
+    TVecPopular *station2 = (TVecPopular *)b;
+    int cmp = 0;
+    if (station1->endStationTrips < station2->endStationTrips){
+        cmp = 1;
+    } else if (station1->endStationTrips > station2->endStationTrips){
+        cmp = -1;
     }
+    if (!cmp)
+        cmp = _strcasecmp(station1->endStation, station2->endStation);
     
-    if(bike->dim_station < pos){
-        fprintf(stderr, "pos > dim");
-        exit(POS_ERR);
-    }
-
-    if(bike->station[pos].nameStation == NULL){
-        fprintf(stderr, "Passing NULL bike getMostPopular");
-        exit(TOK_ERR);
-    }
-    return copyStr(bike->station[pos].most.mostPopRouteEndStation);
+    return cmp;
 }
 
-size_t getMostPopRouteTrips(bikeADT bike, size_t pos){
-    return bike->station[pos].most.mostPopRouteTrips;
+//ordena el vector en por cant de endTrips
+void sortMostPopularVec(bikeADT bike){
+    for(int i = 0 ; i < bike->dim_station ; i++){
+        qsort(bike->station[i].most_vec, bike->station[i].dim_most ,sizeof(TVecPopular), compare_most); //hacer el compare en funcion de los trips
+    }
 }
+
+static int compare_most_name(const void *a, const void *b){
+    TVecPopular *station1 = (TVecPopular *)a;
+    TVecPopular *station2 = (TVecPopular *)b;
+
+    return _strcasecmp(station1->endStation, station2->endStation);
+}
+
+//agrego nombres al vector (solo los endStationTrips mas grandes) ya habiendo ordenado el vector por endTrips
+void addNameToVec(bikeADT bike, size_t startId){ 
+    if(!bike->station[startId-1].dim_most){
+        return;
+    }
+    if(!bike->station[startId-1].dim_most == 1){
+        bike->station[startId-1].most_vec[0].endStation = bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation; //copyStr
+        return;
+    }
+    for(int i = 0 ; i+1 < bike->station[startId-1].dim_most ; i++){
+        if(bike->station[startId-1].most_vec[i].endStationTrips > bike->station[startId-1].most_vec[i+1].endStationTrips){
+            bike->station[startId-1].most_vec[i].endStation = bike->station[bike->station[startId-1].most_vec[i].endStationId-1].nameStation; //copyStr
+            return;
+        }else{
+            bike->station[startId-1].most_vec[i+1].endStation = bike->station[bike->station[startId-1].most_vec[i+1].endStationId-1].nameStation; //copyStr
+            bike->station[startId-1].most_vec[i].endStation = bike->station[bike->station[startId-1].most_vec[i].endStationId-1].nameStation;     //copyStr
+        }   
+    }
+    qsort(bike->station[startId-1].most_vec, bike->station[startId-1].dim_most ,sizeof(TVecPopular), compare_most_name); //ordena el vector por nombre para el caso que tenga 
+}
+
+
+size_t getMostPopRouteTrips(bikeADT bike, size_t pos){ //retorna la cantidad de trips del mas popular
+    return bike->station[pos].most_vec[0].endStationTrips;
+}
+
+char * getMostPopRouteEndStation(bikeADT bike, size_t pos){ //retorna el nombre del mas popular
+    return bike->station[pos].most_vec[0].endStation;
+}
+
 
 void sortAlpha(bikeADT bike){
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
@@ -409,7 +506,7 @@ void freeADT(bikeADT bike){ //libera toda la memoria
     for (size_t i = 0; i < bike->dim_station; i++){
         free(bike->station[i].nameStation);
         free(bike->station[i].oldest.oldestDateTime);
-        free(bike->station[i].most.mostPopRouteEndStation);
+        free(bike->station[i].most_vec);
     }
     free(bike->station);
     /*for (size_t i = 0; i < bike->dim_mat; i++){
