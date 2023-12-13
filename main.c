@@ -126,31 +126,37 @@ void query3(bikeADT bike)
     fprintf(file, "</table>\n</body>\n</html>");
     fclose(file);
 }
+/*
+
+bikeStation;mostPopRouteEndStation;mostPopRouteTrips
+10e avenue / Holt;10e avenue / Masson;541
+10e avenue / Masson;d'Orléans / Masson;1265
+11e avenue / du Souvenir;Métro de la Concorde (Léo-Lacombe);29
+12e avenue / St-Zotique;Métro de la Concorde (Léo-Lacombe);454
+...
+
+
+*/
 
 void query4(bikeADT bike){
-    sortAlpha(bike);
     FILE *file = newFile("query4.html");
-    
-    char * station_name;
-    char * popular_endstation;
-
     if (file == NULL){
         fprintf(stderr, "Error creating file");
         exit(CREA_ERR);
     }
     fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 4</title>\n</head>\n<body>\n");
     fprintf(file, "<table border=\"1\">\n");
-    fprintf(file, "<tr>\n<th>Station Name</th>\n<th>Most Popular Route End Station</th>\n<th>Most Popular Route Trips</th>\n</tr>\n");
-    for (size_t i = 0; i < getRealDim(bike); i++){
-        station_name = getStationName(bike, i);
-        popular_endstation = getMostPopRouteEndStation(bike, i);
-        fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%ld</td>\n</tr>\n", station_name, popular_endstation, getMostPopRouteTrips(bike, i));
-        free(station_name);
-        free(popular_endstation);
+    fprintf(file, "<tr>\n<th>Station Name</th>\n<th>Most Popular Route</th>\n<th>Most Popular Route Trips</th>\n</tr>\n");
+    for (size_t i = 0; i < getResv(bike); i++){
+        if (getUsed(bike, i)){
+            fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%ld</td>\n</tr>\n", getStationName(bike, i), getMostPopRouteEndStation(bike, i), getMostPopRouteTrips(bike, i));
+        }
     }
     fprintf(file, "</table>\n</body>\n</html>");
     fclose(file);
 }
+
+
 
 bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect)
 {
