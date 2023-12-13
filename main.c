@@ -292,7 +292,8 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
         //caso MON
         else{
             char *token = strtok(actualRead, ";");
-            stationId = atoi(token);
+            //stationId = atoi(token);
+            stationId = strtoul(token, NULL, 10);
 
             token = strtok(NULL, ";");
 

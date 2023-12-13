@@ -346,7 +346,7 @@ void tripSort(bikeADT bike){
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
-            bike->station[k].oldest = bike->station[i].oldest;
+            bike->station[k].oldest = bike->station[i].oldest; // MODIFICAR ESTO
             bike->station[k].dim_most = bike->station[i].dim_most;
             bike->station[k].most_vec = realloc(bike->station[k].most_vec, 1*sizeof(TVecPopular));
             bike->station[k].most_vec[0].endStation = NULL;
@@ -366,6 +366,10 @@ void tripSort(bikeADT bike){
 
     for(size_t i = k+1 ; i < bike->resv_station ; i++){
         free(bike->station[i].most_vec);
+        //printf("%s\n", bike->station[i].most_vec[0].endStation); 
+        //printf("%s\n", bike->station[i].nameStation);
+        //printf("%s\n", bike->station[i].oldest.oldestDateTime);
+        //printf("\n");
     }
 
     bike->station = realloc(bike->station, k*sizeof(TVecStation)); 
