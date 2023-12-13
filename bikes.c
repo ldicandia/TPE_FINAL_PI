@@ -61,20 +61,23 @@ typedef struct q3{
 
 //query 5
 //query 5
-
+/*
 typedef struct stations{
     char * nameStation;
     size_t circularTrips; 
+    size_t startId; 
 }stations; 
 
 typedef struct months{
     stations * station; 
     size_t resStat; 
+    size_t dimStat; 
 }months; 
 
 typedef struct q5{
     months month[MONTH]; 
 }TQuery5;
+*/
 //tiene que ser el mismo mes de salida y llegada; 
 
 typedef struct bikeCDT{
@@ -85,7 +88,7 @@ typedef struct bikeCDT{
     //query3
     TQuery3 qtyPerDay[WEEKS];  
 
-    //TQuery5 top3circular[MONTHS]
+    //TQuery5 top3circular[MONTHS];
 
 }bikeCDT;
 
@@ -185,7 +188,7 @@ char * copyStr(const char * s) {
     if (res == NULL) 
         return NULL;
 
-    res = strcpy(res, s);
+    strcpy(res, s);
     
     return res;
 }
@@ -269,7 +272,8 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
 
     addVec(bike, startId, endId);
 
-    //query 5
+    // query 5
+    // void addVecq5(bike->TQuery5, endId, startId, nameStation, startDate, endDate)
 }
 
 
@@ -288,14 +292,25 @@ size_t getUsed(bikeADT bike, size_t idx){
 /*-----------------------------------query 1--------------------------------------*/
 
 size_t getMemberTrips(bikeADT bike, size_t pos){
+    if(bike->dim_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
     return bike->station[pos].memberTrips;
 }
 
 size_t getCausalTrips(bikeADT bike, size_t pos){
+    if(bike->dim_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
     return bike->station[pos].casualTrips;
 }
 
 size_t getAllTrips(bikeADT bike, size_t pos){
+    if(pos > bike->dim_station){
+        exit(1);
+    }
     return bike->station[pos].allTrips;
 }
 
@@ -318,42 +333,54 @@ char * getStationName(bikeADT bike, size_t pos){
 }
 
 void tripSort(bikeADT bike){
-    int k=0;
+    size_t k=0;
     for (size_t i=0; i < bike->resv_station ; i++){
         if (bike->station[i].used == 1){
             free(bike->station[k].nameStation);  
             if(bike->station[i].nameStation != NULL){
                 bike->station[k].nameStation = copyStr(bike->station[i].nameStation);
+                if(i > bike->dim_station){
+                    free(bike->station[i].nameStation);
+                }
             }
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
             bike->station[k].oldest = bike->station[i].oldest;
-            
-            if(bike->station[i].dim_most != 0){
-                bike->station[k].dim_most = bike->station[i].dim_most;
-    
-                if(bike->station[i].most_vec[0].endStation != NULL){
-                    bike->station[k].most_vec = realloc(bike->station[k].most_vec, 1*sizeof(TVecPopular));
-                    bike->station[k].most_vec[0].endStation = NULL;
-                    bike->station[k].most_vec[0].endStation = copyStr(bike->station[i].most_vec[0].endStation);
-                    bike->station[k].most_vec[0].endStationId = bike->station[i].most_vec[0].endStationId;
-                    bike->station[k].most_vec[0].endStationTrips = bike->station[i].most_vec[0].endStationTrips;
-                }
+            bike->station[k].dim_most = bike->station[i].dim_most;
+            bike->station[k].most_vec = realloc(bike->station[k].most_vec, 1*sizeof(TVecPopular));
+            bike->station[k].most_vec[0].endStation = NULL;
+
+            bike->station[k].most_vec[0].endStation = copyStr(bike->station[i].most_vec[0].endStation);
+            if(i > bike->dim_station){
+                free(bike->station[i].most_vec[0].endStation);
             }
+            bike->station[k].most_vec[0].endStationId = bike->station[i].most_vec[0].endStationId;
+            bike->station[k].most_vec[0].endStationTrips = bike->station[i].most_vec[0].endStationTrips;
+                
             bike->station[k].idStation = i+1;
             bike->station[k++].used = 1;
         }
         bike->station[i].used = 0;
     }
+
+    for(size_t i = k+1 ; i < bike->resv_station ; i++){
+        free(bike->station[i].most_vec);
+    }
+
     bike->station = realloc(bike->station, k*sizeof(TVecStation)); 
     bike->dim_station = bike->resv_station = k;
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare);
 }
 
+
 /*-----------------------------------query 2---------------------------------------------------*/
 
 size_t getOldestRoute(bikeADT bike, size_t pos){
+    if(bike->dim_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
     return bike->station[pos].oldest.oldestStationId;
 }
 
@@ -410,8 +437,8 @@ void addVec(bikeADT bike, size_t startId, size_t endId){
 		    }
         }
 
-		int i;
-		for(i = 0 ; i < bike->station[startId-1].dim_most ; i++){
+		int i = 0;
+		for( ; i < bike->station[startId-1].dim_most ; i++){
 			if(bike->station[startId-1].most_vec[i].endStationId == endId){ //sumo una trip a endId (ya estaba cargado)
 				bike->station[startId-1].most_vec[i].endStationTrips++;
 				return;
@@ -424,6 +451,11 @@ void addVec(bikeADT bike, size_t startId, size_t endId){
 		return;
     }
 }
+/*
+void reallocEachVec(bikeADT bike, size_t pos){
+    bike->station[pos].most_vec = realloc(bike->station[pos].most_vec, (bike->station[pos].dim_most)*sizeof(TVecPopular));
+}
+*/
 
 
 static int compare_most(const void *a, const void *b){
@@ -458,24 +490,33 @@ static int compare_most_name(const void *a, const void *b){
 }
 
 //agrego nombres al vector (solo los endStationTrips mas grandes) ya habiendo ordenado el vector por endTrips
-void addNameToVec(bikeADT bike, size_t startId){ 
-    if(!bike->station[startId-1].dim_most){
+void addNameToVec(bikeADT bike, size_t pos){ 
+    if(bike->resv_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
+    
+
+    if(!bike->station[pos].dim_most){
         return;
     }else{
-        if(bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation == NULL){
+        if(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation == NULL){
             fprintf(stderr, "IS NULL");
             exit(1);
         }
-        //printf("NOMBRE ENDID: %s\n", bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation);
-        //printf("END ID: %zu\n", bike->station[startId-1].most_vec[0].endStationId-1);
-        
-        bike->station[startId-1].most_vec[0].endStation = copyStr(bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation);
+
+        bike->station[pos].most_vec = realloc(bike->station[pos].most_vec, sizeof(TVecPopular));
+        bike->station[pos].most_vec[0].endStation = copyStr(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation);
     }
 }
 
 
 
 size_t getMostPopRouteTrips(bikeADT bike, size_t pos){ //retorna la cantidad de trips del mas popular
+    if(bike->dim_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
     return bike->station[pos].most_vec[0].endStationTrips;
 }
 
@@ -485,8 +526,8 @@ char * getMostPopRouteEndStation(bikeADT bike, size_t pos){ //retorna el nombre 
         exit(POS_ERR);
     }
 
-    if( bike->station[pos].most_vec[0].endStation == NULL){
-        fprintf(stderr, "Passing NULL bike MOSTPOPULAR StationName");
+    if(bike->station[pos].most_vec[0].endStation == NULL){
+        fprintf(stderr, "Passing NULL bike MOSTPOPULAR StationName\n");
         //exit(POS_ERR);
         return NULL;
     }
@@ -494,9 +535,68 @@ char * getMostPopRouteEndStation(bikeADT bike, size_t pos){ //retorna el nombre 
     return copyStr(bike->station[pos].most_vec[0].endStation);
 }
 
+
 void sortAlpha(bikeADT bike){
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
 }
+
+/*---------------------------------------query 5------------------------------------------------------*/
+/*
+void addVecq5(TQuery5 query5, size_t endId, size_t startId, , char * startDate, char * endDate){
+    int c = getMonth(startDate, endDate); 
+    if(endId == startId && c != -1){
+        if(query5->month[c].dimStat == query5->month[c].resStat){
+            query5->month[c].station = realloc(query5->month[c].station, (query5->month[c].dimStat + BLOCK) * sizeof(stations)); 
+            query5->month[c].resStat += BLOCK; 
+            for(int i = query5->month[c].dim; i < query5->month[c].resStat; i++){
+                query5->month[c].station[i].nameStation = NULL;
+                query5->month[c].station[i].circularTrips = 0; 
+                query5->month[c].station[i].startId = 0; 
+            }
+            query5->month[c].dimStat++; 
+        }
+        int i; 
+        for(i = 0; i < query5->month[c].dimStat; i++){
+            if(query5->month[c].station[i].startId == startId){
+                query5->month[c].station[i].circularTrips++; 
+                return; 
+            }
+        }
+        query5->month[c].station[i].startId = startId; 
+        query5->month[c].station[i].circularTrips++; 
+        query5->month[c].dimStat++; 
+        return; 
+    }
+}
+
+void sortCircularTrpVec(TQuery5 query5){
+    for(int i = 0 ; i < TQuery5 query5MONTH ; i++){
+        if(bike->station[i].used){
+            qsort(bike->station[i].most_vec, bike->station[i].dim_most ,sizeof(TVecPopular), compare_most); //hacer el compare en funcion de los trips
+        }
+    }
+}
+*/
+
+/*
+void addNameToVecq
+*/
+
+
+/*void addNameToVec(bikeADT bike, size_t pos){
+    if(!bike->station[pos].dim_most){
+        return;
+    }else{
+        if(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation == NULL){
+            fprintf(stderr, "IS NULL");
+            exit(1);
+        }
+        //printf("NOMBRE ENDID: %s\n", bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation);
+        //printf("END ID: %zu\n", bike->station[startId-1].most_vec[0].endStationId-1);
+
+        bike->station[pos].most_vec[0].endStation = copyStr(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation);
+    }
+}*/
 
 /*----------------------FREES-----------------------------*/
 
@@ -504,12 +604,13 @@ void freeADT(bikeADT bike){ //libera toda la memoria
     if(bike == NULL){
         exit(MEMO_ERR);
     }
-    for (size_t i = 0; i < bike->dim_station; i++){
+    for (size_t i = 0; i < bike->dim_station ; i++){
         free(bike->station[i].nameStation);
         free(bike->station[i].oldest.oldestDateTime);
         free(bike->station[i].most_vec[0].endStation);
         free(bike->station[i].most_vec);
     }
+
     free(bike->station);
     free(bike);
 }

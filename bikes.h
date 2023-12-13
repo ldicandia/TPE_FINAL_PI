@@ -86,6 +86,8 @@ void freeADT(bikeADT bike);
 
 void addVec(bikeADT bike, size_t startId, size_t endId);
 
+void reallocEachVec(bikeADT bike, size_t pos);
+
 /*query 5*/
 
 

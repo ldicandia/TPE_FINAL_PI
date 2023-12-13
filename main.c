@@ -144,12 +144,20 @@ void query4(bikeADT bike){
         fprintf(stderr, "Error creating file");
         exit(CREA_ERR);
     }
+
+    char * station_name;
+    char * mostPopularEnd;
+
     fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 4</title>\n</head>\n<body>\n");
     fprintf(file, "<table border=\"1\">\n");
     fprintf(file, "<tr>\n<th>Station Name</th>\n<th>Most Popular Route</th>\n<th>Most Popular Route Trips</th>\n</tr>\n");
-    for (size_t i = 0; i < getResv(bike); i++){
+    for (size_t i = 0; i < getRealDim(bike); i++){
         if (getUsed(bike, i)){
-            fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%ld</td>\n</tr>\n", getStationName(bike, i), getMostPopRouteEndStation(bike, i), getMostPopRouteTrips(bike, i));
+            station_name = getStationName(bike, i);
+            mostPopularEnd = getMostPopRouteEndStation(bike, i);
+            fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%ld</td>\n</tr>\n", station_name, mostPopularEnd, getMostPopRouteTrips(bike, i));
+            free(station_name);
+            free(mostPopularEnd);
         }
     }
     fprintf(file, "</table>\n</body>\n</html>");
@@ -234,7 +242,15 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
             
 
     }
-   
+
+    /*
+    for(int i = 0 ; i < getResv(bike) ; i++){
+        if(getUsed(bike, i)){
+            reallocEachVec(bike, i);
+        }
+    }
+    */
+
     sortMostPopularVec(bike);
 
     fclose(file);
@@ -287,11 +303,11 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
                 fprintf(stderr, "token name NULL");
                 exit(1);
             }
-
             token = strtok(NULL, "\n");
         }
 
         string_cpy(bike, stationName, stationId);
+        free(stationName);
     }    
 
     for(int i = 0 ; i < getResv(bike) ; i++){
