@@ -1,4 +1,4 @@
-COMPILER = gcc
+COMPILER = gcc bikes.c
 OUTPUT_FILES = bikeSharingMON bikeSharingNYC
 
 FLAGS = -pedantic -std=c99 -Wall -fsanitize=address
@@ -16,16 +16,7 @@ mon: $(OBJECT_FILES)
 nyc: $(OBJECT_FILES)
 	$(COMPILER) -o bikeSharingNYC $(OBJECT_FILES) $(FLAGS)
 
-main.o: main.c
-	$(COMPILER) -c main.c $(FLAGS)
-
-bikes.o: bikes.c
-	$(COMPILER) -c bikes.c $(FLAGS)
-
-htmlTable.o: htmlTable.c
-	$(COMPILER) -c htmlTable.c $(FLAGS)
-
-
 clean:
 	rm -f $(OUTPUT_FILES) $(OBJECT_FILES)
 	@echo "Makefile: Object files and output files deleted."
+
