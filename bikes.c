@@ -61,24 +61,18 @@ typedef struct q3{
 
 //query 5
 //query 5
-/*
+
 typedef struct stations{
     char * nameStation;
     size_t circularTrips; 
     size_t startId; 
 }stations; 
 
-typedef struct months{
-    stations * station; 
+typedef struct q5{
+    stations * circularStations; 
     size_t resStat; 
     size_t dimStat; 
-}months; 
-
-typedef struct q5{
-    months month[MONTH]; 
-}TQuery5;
-*/
-//tiene que ser el mismo mes de salida y llegada; 
+}TQuery5; 
 
 typedef struct bikeCDT{
     TVecStation * station;       
@@ -87,7 +81,7 @@ typedef struct bikeCDT{
 
     //query3
     TQuery3 qtyPerDay[WEEKS];  
-
+    TQuery5 month[MONTH]; 
     //TQuery5 top3circular[MONTHS];
 
 }bikeCDT;
@@ -130,7 +124,7 @@ static int getDay(const char *dateString) {
     return localTimeStruct->tm_wday;
 }
 
-/*
+
 // si hay un viaje circular se llama a getmonth
 // getmonth devuelve el numero del mes donde ocurrio el viaje circular
 // si el viaje circular empieza en un mes y termina en otro, devuelve -1
@@ -154,7 +148,7 @@ static size_t getMonth(char *startDate, char *endDate){
     }
 
     return -1;
-}*/
+}
 
 static int compare(const void *a, const void *b)
 {
@@ -271,7 +265,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     //query 4
 
     addVec(bike, startId, endId);
-
+    addVecq5(bike, endId, startId, startDate, endDate);
     // query 5
     // void addVecq5(bike->TQuery5, endId, startId, nameStation, startDate, endDate)
 }
@@ -545,49 +539,52 @@ void sortAlpha(bikeADT bike){
 }
 
 /*---------------------------------------query 5------------------------------------------------------*/
-/*
-void addVecq5(TQuery5 query5, size_t endId, size_t startId, , char * startDate, char * endDate){
+
+void addVecq5(bikeADT bike, size_t endId, size_t startId, char * startDate, char * endDate){
     int c = getMonth(startDate, endDate); 
     if(endId == startId && c != -1){
-        if(query5->month[c].dimStat == query5->month[c].resStat){
-            query5->month[c].station = realloc(query5->month[c].station, (query5->month[c].dimStat + BLOCK) * sizeof(stations)); 
-            query5->month[c].resStat += BLOCK; 
-            for(int i = query5->month[c].dim; i < query5->month[c].resStat; i++){
-                query5->month[c].station[i].nameStation = NULL;
-                query5->month[c].station[i].circularTrips = 0; 
-                query5->month[c].station[i].startId = 0; 
+        if(bike->month[c].dimStat == bike->month[c].resStat){
+            bike->month[c].circularStations = realloc(bike->month[c].circularStations, (bike->month[c].dimStat + BLOCK) * sizeof(stations)); 
+            bike->month[c].resStat += BLOCK; 
+            for(int i = bike->month[c].dimStat; i < bike->month[c].resStat; i++){
+                bike->month[c].circularStations[i].nameStation = NULL;
+                bike->month[c].circularStations[i].circularTrips = 0; 
+                bike->month[c].circularStations[i].startId = 0; 
             }
-            query5->month[c].dimStat++; 
+            bike->month[c].dimStat++; 
         }
         int i; 
-        for(i = 0; i < query5->month[c].dimStat; i++){
-            if(query5->month[c].station[i].startId == startId){
-                query5->month[c].station[i].circularTrips++; 
+        for(i = 0; i < bike->month[c].dimStat; i++){
+            if(bike->month[c].circularStations[i].startId == startId){
+                bike->month[c].circularStations[i].circularTrips++; 
                 return; 
             }
         }
-        query5->month[c].station[i].startId = startId; 
-        query5->month[c].station[i].circularTrips++; 
-        query5->month[c].dimStat++; 
+        bike->month[c].circularStations[i].startId = startId; 
+        bike->month[c].circularStations[i].circularTrips++; 
+        bike->month[c].dimStat++; 
         return; 
     }
 }
 
-void sortCircularTrpVec(TQuery5 query5){
-    for(int i = 0 ; i < TQuery5 query5MONTH ; i++){
-        if(bike->station[i].used){
-            qsort(bike->station[i].most_vec, bike->station[i].dim_most ,sizeof(TVecPopular), compare_most); //hacer el compare en funcion de los trips
-        }
+void sortCircularVec(bikeADT bike){
+    for(int i = 0 ; i < MONTH-1 ; i++){
+        qsort(bike->month[i].circularStations, bike->month[i].dimStat , sizeof(stations), compare_circular); //hacer el compare en funcion de los trips
     }
 }
-*/
-
-/*
-void addNameToVecq
-*/
 
 
-/*void addNameToVec(bikeADT bike, size_t pos){
+//quiero asignarle a las primeras tres posiciones de cada vector "circularVec" sus respectivos nombre
+void addNameToVecQ5(bikeADT bike){
+   
+}
+
+/*if(bike->resv_station < pos){
+        fprintf(stderr, "pos > dim: getStation Name");
+        exit(POS_ERR);
+    }
+
+
     if(!bike->station[pos].dim_most){
         return;
     }else{
@@ -595,12 +592,10 @@ void addNameToVecq
             fprintf(stderr, "IS NULL");
             exit(1);
         }
-        //printf("NOMBRE ENDID: %s\n", bike->station[bike->station[startId-1].most_vec[0].endStationId-1].nameStation);
-        //printf("END ID: %zu\n", bike->station[startId-1].most_vec[0].endStationId-1);
 
+        bike->station[pos].most_vec = realloc(bike->station[pos].most_vec, sizeof(TVecPopular));
         bike->station[pos].most_vec[0].endStation = copyStr(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation);
-    }
-}*/
+    }*/
 
 /*----------------------FREES-----------------------------*/
 

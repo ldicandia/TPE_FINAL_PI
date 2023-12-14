@@ -252,6 +252,7 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
     */
 
     sortMostPopularVec(bike);
+    sortCircularVec(bike);
 
     fclose(file);
     return bike;
@@ -314,9 +315,12 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     for(int i = 0 ; i < getResv(bike) ; i++){
         if(getUsed(bike, i)){
             addNameToVec(bike, i);
+            addNameToVecQ5(bike, i);
         }
     }
+
     
+
     fclose(file);
 }
 
