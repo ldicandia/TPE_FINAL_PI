@@ -35,18 +35,10 @@ int main(int argc, char *argv[]){
         yearFrom = atoi(argv[3]);
         yearTo = atoi(argv[3]);
     }
-    if (strcmp(argv[1], argv[2]) > 0){
-        bike = csvReader(argv[2], yearFrom, yearTo, &formatDetect);
-        nameReader(bike, argv[1], &formatDetect);
-    }
-    else if (strcmp(argv[1], argv[2]) < 0){
-        bike = csvReader(argv[1], yearFrom, yearTo, &formatDetect);
-        nameReader(bike, argv[2], &formatDetect);
-    }
-    else{
-        fprintf(stderr, "Invalid arguments order\n");
-        exit(1);
-    }
+    
+    bike = csvReader(argv[1], yearFrom, yearTo, &formatDetect);
+    nameReader(bike, argv[2], &formatDetect);
+    
     if (bike == NULL){
         fprintf(stderr, "Memory error");
         exit(MEMO_ERR);

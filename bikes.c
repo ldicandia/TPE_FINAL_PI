@@ -95,7 +95,6 @@ size_t getErrorFlag(bikeADT bike){
 
 bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
     if (bike == NULL || from == NULL) {
-        
         bike->errorFlag= ENT_ERR;
     }
     
@@ -114,7 +113,7 @@ static int _strcasecmp(const char *s1, const char *s2){
 }
 
 
-static int getDay(const char *dateString) {
+static int getDay(const char *dateString){
     struct tm dateStruct;
     memset(&dateStruct, 0, sizeof(struct tm));
 
@@ -127,27 +126,23 @@ static int getDay(const char *dateString) {
 
     struct tm *localTimeStruct = localtime(&t);
 
-    return localTimeStruct->tm_wday; //CAMBIO -1
+    return localTimeStruct->tm_wday; 
 }
 
 
-// si hay un viaje circular se llama a getmonth
-// getmonth devuelve el numero del mes donde ocurrio el viaje circular
-// si el viaje circular empieza en un mes y termina en otro, devuelve -1
+
 
 
 size_t getMonth(char *startDate, char *endDate){
-    // el formato de las fechas es 2021-09-20 06:31:28 y solo quiero tener el mes, en este caso 09
-
     size_t month1;
     size_t month2;
 
-    char *token = strtok(startDate, "-"); // salteo la primera parte hasta llegar al mes
-    token = strtok(NULL, "-");            // copio mes
+    char *token = strtok(startDate, "-"); 
+    token = strtok(NULL, "-");            
     month1 = strtoul(token, NULL, 10);
 
-    token = strtok(endDate, "-"); // salteo la primera parte hasta llegar al mes
-    token = strtok(NULL, "-");    // copio mes
+    token = strtok(endDate, "-"); 
+    token = strtok(NULL, "-");    
     month2 = strtoul(token, NULL, 10);
 
     if (month1 == month2)
@@ -159,8 +154,7 @@ size_t getMonth(char *startDate, char *endDate){
 }
 
 
-static int compare(const void *a, const void *b)
-{
+static int compare(const void *a, const void *b){
     TVecStation *station1 = (TVecStation *)a;
     TVecStation *station2 = (TVecStation *)b;
     int cmp = 0;
@@ -275,10 +269,7 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     bike->qtyPerDay[end].endedTrips++;
 
     //query 2
-
-    //se actualiza el oldest time y el oldest endId
     if(bike->station[startId-1].oldest.oldestDateTime == NULL){
-
         bike->station[startId-1].oldest.oldestDateTime = malloc(strlen(startDate)+1);
         bike->station[startId-1].oldest.oldestDateTime = strcpy(bike->station[startId-1].oldest.oldestDateTime, startDate);
         bike->station[startId-1].oldest.oldestStationId = endId;
@@ -362,8 +353,6 @@ void tripSort(bikeADT bike){
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
-            
-            //bike->station[k].oldest = bike->station[i].oldest;
 
             bike->station[k].oldest.oldestDateTime = copyStr(bike->station[i].oldest.oldestDateTime);
             free(bike->station[i].oldest.oldestDateTime);
@@ -461,7 +450,6 @@ char * getMonthOfTheYear(size_t month){
 /*---------------------------------------query 4------------------------------------------------------*/
 
 
-//agrega al vector los endId
 void addVec(bikeADT bike, size_t startId, size_t endId){ 
     if(startId != endId){
 		if(bike->station[startId-1].dim_most == bike->station[startId-1].resv_most){

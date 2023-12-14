@@ -53,7 +53,7 @@ void putStation(bikeADT bike, char * startDate, size_t startId, char * endDate, 
 
 bikeADT string_cpy(bikeADT bike, char * from, size_t stationId);
 
-//
+//devuelve un duplicado del string
 
 char * copyStr(const char * s);
 
@@ -87,7 +87,7 @@ size_t getCausalTrips(bikeADT bike, size_t pos);
 
 size_t getAllTrips(bikeADT bike, size_t pos);
 
-//
+//ordena el vector de estaciones por cantidad de viajes totales
 
 void tripSort(bikeADT bike);
 
