@@ -17,6 +17,7 @@ void query2(bikeADT bike);
 void query3(bikeADT bike);
 void query4(bikeADT bike);
 void query5(bikeADT bike);
+
 FILE *newFile(const char *inputFile);
 
 int main(int argc, char *argv[])
@@ -24,7 +25,7 @@ int main(int argc, char *argv[])
     size_t formatDetect;
     size_t yearFrom = 0, yearTo = 0;
 
-    bikeADT bike = new ();
+    bikeADT bike = new();
 
     if (argc < 3){
         fprintf(stderr, "Invalid arguments\n");
@@ -54,8 +55,10 @@ int main(int argc, char *argv[])
     query2(bike);
     query3(bike);
     query4(bike);
+    query5(bike);
 
     freeADT(bike);
+    free(bike);
 
     return 0;
 }
@@ -87,6 +90,7 @@ void query1(bikeADT bike)
 void query2(bikeADT bike)
 {
     char * station_name;
+    char * station_end;
     char * oldest_date;
 
     sortAlpha(bike);
@@ -102,9 +106,11 @@ void query2(bikeADT bike)
     for (size_t i = 0; i < getRealDim(bike); i++)
     {
         station_name = getStationName(bike, i);
+        station_end = getOldestName(bike, i);
         oldest_date = getOldestDateTime(bike, i);
-        fprintf(file, "<tr>\n<td>%s</td>\n<td>%ld</td>\n<td>%s</td>\n</tr>\n", station_name, getOldestRoute(bike, i), oldest_date);
+        fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%s</td>\n</tr>\n", station_name, station_end, oldest_date);
         free(station_name);
+        free(station_end);
         free(oldest_date);
     }
     fprintf(file, "</table>\n</body>\n</html>");
@@ -121,9 +127,10 @@ void query3(bikeADT bike)
     fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 3</title>\n</head>\n<body>\n");
     fprintf(file, "<table border=\"1\">\n");
     fprintf(file, "<tr>\n<th>Day</th>\n<th>Started Trips</th>\n<th>Ended Trips</th>\n</tr>\n");
-    for (size_t i = 0; i < 7; i++){
+    for (size_t i = 1; i < 7; i++){
         fprintf(file, "<tr>\n<td>%s</td>\n<td>%ld</td>\n<td>%ld</td>\n</tr>\n", getDayOfTheWeek(i), getstartedTrips(bike, i, NULL), getEndedTrips(bike, i, NULL));
     }
+    fprintf(file, "<tr>\n<td>%s</td>\n<td>%ld</td>\n<td>%ld</td>\n</tr>\n", getDayOfTheWeek(0), getstartedTrips(bike, 0, NULL), getEndedTrips(bike, 0, NULL));
     fprintf(file, "</table>\n</body>\n</html>");
     fclose(file);
 }
@@ -176,6 +183,7 @@ February;Empty;Empty;Empty
 November;Crescent / de Maisonneuve;de la Commune / St-Sulpice;Parc Jean-Drapeau (Chemin Macdonald)
 December;Empty;Empty;Empty
 */
+
 void query5(bikeADT bike){
     FILE *file = newFile("query5.html");
     if (file == NULL){
@@ -184,40 +192,27 @@ void query5(bikeADT bike){
     }
 
     char * station_name;
-    char * station_name2;
-    char * station_name3;
 
     fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 5</title>\n</head>\n<body>\n");
     fprintf(file, "<table border=\"1\">\n");
     fprintf(file, "<tr>\n<th>Month</th>\n<th>Loop Top 1 Station</th>\n<th>Loop Top 2 Station</th>\n<th>Loop Top 3 Station</th>\n</tr>\n");
-    for (size_t i = 0; i < 12; i++){
+    for (size_t i = 0; i < MONTH ; i++){
         fprintf(file, "<tr>\n<td>%s</td>\n", getMonthOfTheYear(i));
-        if (getCircularName(bike, i, 0) != NULL){
-            station_name = getCircularName(bike, i, 0);
-            fprintf(file, "<td>%s</td>\n", station_name);
-            free(station_name);
-        }else{
-            fprintf(file, "<td>Empty</td>\n");
-        }
-        if (getCircularName(bike, i, 1) != NULL){
-            station_name2 = getCircularName(bike, i, 1);
-            fprintf(file, "<td>%s</td>\n", station_name2);
-            free(station_name2);
-        }else{
-            fprintf(file, "<td>Empty</td>\n");
-        }
-        if (getCircularName(bike, i, 2) != NULL){
-            station_name3 = getCircularName(bike, i, 2);
-            fprintf(file, "<td>%s</td>\n", station_name3);
-            free(station_name3);
-        }else{
-            fprintf(file, "<td>Empty</td>\n");
+        for(size_t j = 0 ; j < getDimMonthStations(bike, i) ; j++){
+                station_name = getCircularName(bike, i, j);
+                if(station_name != NULL){
+                    fprintf(file, "<td>%s</td>\n", station_name);
+                }else{
+                    fprintf(file, "<td>Empty</td>\n");
+                }
+                free(station_name);
         }
         fprintf(file, "</tr>\n");
     }
     fprintf(file, "</table>\n</body>\n</html>");
     fclose(file);
 }
+
 
 bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect)
 {
@@ -368,12 +363,13 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     for(int i = 0 ; i < getResv(bike) ; i++){
         if(getUsed(bike, i)){
             addNameToVec(bike, i);
+            addNameToOldest(bike, i);
             //se llama para cada posicion en el vector station donde el used es 1
-            addNameToVecQ5(bike, i);
         }
     }
-
-    
+    for(int i = 0 ; i < MONTH ; i++){
+        addNameToVecQ5(bike, i);
+    }
 
     fclose(file);
 }

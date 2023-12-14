@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #define MAXCHAR 200
+#define MONTH 12
 
 /*
 tipos de errores:
@@ -60,6 +61,10 @@ size_t getOldestRoute(bikeADT bike, size_t pos);
 
 char * getOldestDateTime(bikeADT bike, size_t pos);
 
+char * getOldestName(bikeADT bike, size_t pos);
+
+void addNameToOldest(bikeADT bike, size_t pos);
+
 /*query 3*/
 
 size_t getstartedTrips(bikeADT bike, int day, int * flag);
@@ -100,9 +105,11 @@ void addNameToVecQ5(bikeADT bike, size_t pos);
 
 char * getCircularName(bikeADT bike, size_t month, size_t pos);
 
-static size_t getMonth(char *startDate, char *endDate);
+size_t getMonth(char *startDate, char *endDate);
 
 char * getMonthOfTheYear(size_t month);
+
+size_t getDimMonthStations(bikeADT bike, size_t pos);
 
 #endif
 
