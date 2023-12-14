@@ -7,22 +7,43 @@
 - _Mateo Pirola 62810_
 - _Lucas Di Candia 63212_
 
-#### CREACION DE EJECUTABLE
-    Compilacion:
-Para compilar, simplemente ejecute make en la terminal desde el directorio en el que se encuentra el archivo Makefile:
-    - make
-Esto generara el ejecutable: main.out
+## Compilacion y ejecucion del programa.
+### Compilacion
+Para compilar el proyecto ingrese a su directorio con los archivos fuente, correr:
+```
+make all
+```
 
-Si desea compilar el programa, puede hacerlo poniendo:
-    - make main
+Si desea unicamente crear el proyecto para la informacion de tipo "Montreal", entonces correr:
+```
+make mon
+```
+Caso contrario, para la informacion de tipo "New York City", correr:
+```
+make nyc
+```
 
-#### EJECUCION
-    Ejecucion
-Una vez que el programa este compilado, puede ejecutarlo desde la linea de comandos de la siguiente manera:
+### Ejecucion
+Una vez compilado el programa, para ejecutarlo se debe correr de la siguiente manera.
+```
+./bikeSharingMON bikesMON.csv stationsMON.csv
+```
+_Siendo, bikeSharingMON el nombre del ejecutable, bikesMON el .csv que contiene la informacion de rentas para Montreal, y stationsMON la informacion de estaciones que contiene la misma ciudad._
+```
+./bikeSharingNYC bikesNYC.csv stationsNYC.csv
+```
+_Siendo, bikeSharingNYC el nombre del ejecutable, bikesNYC el .csv que contiene la informacion de rentas para New York City, y stationsNYC la informacion de estaciones que contiene la misma ciudad._
 
-    - ./main.out bikesMON.csv stationsMON.csv
-o sino: 
-    - ./main.out bikesNYC.csv stationsNYC.csv
+## Queries
 
-Por favor, asegurese de que los archivos CSV bikesMON.csv, stationsMON.csv, bikesNYC.csv y stationsNYC.csv esten en el mismo directorio que los ejecutables o proporcionar la ruta completa a los archivos.
+### Query1
+
+### Query2
+
+### Query3 
+
+### Query4
+
+### Query5 
+
 
