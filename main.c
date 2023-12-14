@@ -16,6 +16,7 @@ void query1(bikeADT bike);
 void query2(bikeADT bike);
 void query3(bikeADT bike);
 void query4(bikeADT bike);
+void query5(bikeADT bike);
 FILE *newFile(const char *inputFile);
 
 int main(int argc, char *argv[])
@@ -165,6 +166,58 @@ void query4(bikeADT bike){
 }
 
 
+/* query 5 debe imprimir un html de la siguiente forma llamando a la funcion getCircularName
+Salida de ejemplo para montreal: 
+
+month;loopsTop1St;loopsTop2St;loopsTop3St
+January;Empty;Empty;Empty
+February;Empty;Empty;Empty
+
+November;Crescent / de Maisonneuve;de la Commune / St-Sulpice;Parc Jean-Drapeau (Chemin Macdonald)
+December;Empty;Empty;Empty
+*/
+void query5(bikeADT bike){
+    FILE *file = newFile("query5.html");
+    if (file == NULL){
+        fprintf(stderr, "Error creating file");
+        exit(CREA_ERR);
+    }
+
+    char * station_name;
+    char * station_name2;
+    char * station_name3;
+
+    fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 5</title>\n</head>\n<body>\n");
+    fprintf(file, "<table border=\"1\">\n");
+    fprintf(file, "<tr>\n<th>Month</th>\n<th>Loop Top 1 Station</th>\n<th>Loop Top 2 Station</th>\n<th>Loop Top 3 Station</th>\n</tr>\n");
+    for (size_t i = 0; i < 12; i++){
+        fprintf(file, "<tr>\n<td>%s</td>\n", getMonthOfTheYear(i));
+        if (getCircularName(bike, i, 0) != NULL){
+            station_name = getCircularName(bike, i, 0);
+            fprintf(file, "<td>%s</td>\n", station_name);
+            free(station_name);
+        }else{
+            fprintf(file, "<td>Empty</td>\n");
+        }
+        if (getCircularName(bike, i, 1) != NULL){
+            station_name2 = getCircularName(bike, i, 1);
+            fprintf(file, "<td>%s</td>\n", station_name2);
+            free(station_name2);
+        }else{
+            fprintf(file, "<td>Empty</td>\n");
+        }
+        if (getCircularName(bike, i, 2) != NULL){
+            station_name3 = getCircularName(bike, i, 2);
+            fprintf(file, "<td>%s</td>\n", station_name3);
+            free(station_name3);
+        }else{
+            fprintf(file, "<td>Empty</td>\n");
+        }
+        fprintf(file, "</tr>\n");
+    }
+    fprintf(file, "</table>\n</body>\n</html>");
+    fclose(file);
+}
 
 bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t *formatDetect)
 {
@@ -315,6 +368,7 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
     for(int i = 0 ; i < getResv(bike) ; i++){
         if(getUsed(bike, i)){
             addNameToVec(bike, i);
+            //se llama para cada posicion en el vector station donde el used es 1
             addNameToVecQ5(bike, i);
         }
     }

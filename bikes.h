@@ -74,7 +74,9 @@ void sortMostPopularVec(bikeADT bike);
 
 void sortAlpha(bikeADT bike);
 
-char * getMostPopRouteEndStation(bikeADT bike, size_t pos);
+void sortCircularVec(bikeADT bike);
+
+char *getMostPopRouteEndStation(bikeADT bike, size_t pos);
 
 size_t getMostPopRouteTrips(bikeADT bike, size_t pos);
 
@@ -88,9 +90,19 @@ void addVec(bikeADT bike, size_t startId, size_t endId);
 
 void reallocEachVec(bikeADT bike, size_t pos);
 
+
+
 /*query 5*/
 
+void addVecq5(bikeADT bike, size_t endId, size_t startId, char *startDate, char *endDate);
 
+void addNameToVecQ5(bikeADT bike, size_t pos);
+
+char * getCircularName(bikeADT bike, size_t month, size_t pos);
+
+static size_t getMonth(char *startDate, char *endDate);
+
+char * getMonthOfTheYear(size_t month);
 
 #endif
 

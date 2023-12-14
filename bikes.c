@@ -187,6 +187,18 @@ char * copyStr(const char * s) {
     return res;
 }
 
+static int compare_circular(const void *a, const void *b){
+    stations *station1 = (stations *)a;
+    stations *station2 = (stations *)b;
+    int cmp = 0;
+    if (station1->circularTrips < station2->circularTrips){
+        cmp = 1;
+    } else if (station1->circularTrips > station2->circularTrips){
+        cmp = -1;
+    }    
+    return cmp;
+}
+
 /*-----------------------LOAD--------------------------------*/
 
 bikeADT new(void){
@@ -414,8 +426,13 @@ size_t getEndedTrips(bikeADT bike, int day, int * flag){
 }
 
 char * getDayOfTheWeek(size_t day){
-    char * days[] = {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"};
+    char * days[] = {"Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"};
     return days[day];
+}
+
+char * getMonthOfTheYear(size_t month){
+    char * months[]={"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+    return months[month];
 }
 
 /*---------------------------------------query 4------------------------------------------------------*/
@@ -574,28 +591,33 @@ void sortCircularVec(bikeADT bike){
 }
 
 
-//quiero asignarle a las primeras tres posiciones de cada vector "circularVec" sus respectivos nombre
-void addNameToVecQ5(bikeADT bike){
-   
-}
 
-/*if(bike->resv_station < pos){
+//quiero asignarle a las primeras tres posiciones de cada vector "circularVec" sus respectivos nombre
+void addNameToVecQ5(bikeADT bike, size_t pos){
+    if(bike->dim_station < pos){
         fprintf(stderr, "pos > dim: getStation Name");
         exit(POS_ERR);
     }
-
-
-    if(!bike->station[pos].dim_most){
+    if(!bike->month[pos].dimStat){
         return;
     }else{
-        if(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation == NULL){
+        if(bike->station[bike->month[pos].circularStations[0].startId-1].nameStation == NULL){
             fprintf(stderr, "IS NULL");
             exit(1);
         }
+        bike->month[pos].circularStations = realloc(bike->month[pos].circularStations, sizeof(stations));
+        bike->month[pos].circularStations[0].nameStation = copyStr(bike->station[bike->month[pos].circularStations[0].startId-1].nameStation);
+    }
+}
 
-        bike->station[pos].most_vec = realloc(bike->station[pos].most_vec, sizeof(TVecPopular));
-        bike->station[pos].most_vec[0].endStation = copyStr(bike->station[bike->station[pos].most_vec[0].endStationId-1].nameStation);
-    }*/
+//accede al nombre del vector circularStations de un determinado mes, en la posicion pos
+char * getCircularName(bikeADT bike, size_t month, size_t pos){
+    if(bike->month[month].circularStations[pos].nameStation == NULL){
+        fprintf(stderr, "Passing NULL bike getCircularName");
+        exit(POS_ERR);
+    }
+    return copyStr(bike->month[month].circularStations[pos].nameStation);
+}
 
 /*----------------------FREES-----------------------------*/
 
@@ -608,8 +630,9 @@ void freeADT(bikeADT bike){ //libera toda la memoria
         free(bike->station[i].oldest.oldestDateTime);
         free(bike->station[i].most_vec[0].endStation);
         free(bike->station[i].most_vec);
+        
     }
-
+    
     free(bike->station);
     free(bike);
 }
