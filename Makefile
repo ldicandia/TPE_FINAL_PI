@@ -1,4 +1,4 @@
-COMPILER = gcc main.c bikes.c
+COMPILER = gcc main.c bikes.c htmlTable.c
 OUTPUT_FILES = bikeSharingMON bikeSharingNYC
 
 FLAGS = -pedantic -std=c99 -Wall -fsanitize=address
