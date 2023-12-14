@@ -491,12 +491,6 @@ void addVec(bikeADT bike, size_t startId, size_t endId){
 		return;
     }
 }
-/*
-void reallocEachVec(bikeADT bike, size_t pos){
-    bike->station[pos].most_vec = realloc(bike->station[pos].most_vec, (bike->station[pos].dim_most)*sizeof(TVecPopular));
-}
-*/
-
 
 static int compare_most(const void *a, const void *b){
     TVecPopular *station1 = (TVecPopular *)a;
