@@ -7,6 +7,7 @@
 #define MAXCHAR 200
 #define MONTH 12
 #define WEEKS 7
+#define NAME_DISPLAY 3
 
 /*
 tipos de errores:
@@ -15,13 +16,13 @@ tipos de errores:
 - CREA_ERR = error al crear el archivo
 - MEMO_ERR = error de creacion de memoria
 - TOK_ERR = error de token nulo
-- NEX_ERR = error al chequear si hay un proximo en el iterador
-- CPY_ERR = error de strcpy.
 - POS_ERR = pos > dim.
 - PAR_ERR = parsing liner error.
+- ENT_ERR = error de entrada
+- CPY_ERR = error de strcpy.
 */
 
-enum errors{OK=0, ARG_ERR, OPEN_ERR, CREA_ERR, MEMO_ERR, TOK_ERR, POS_ERR, PAR_ERR};
+enum errors{OK=0, ARG_ERR, OPEN_ERR, CREA_ERR, MEMO_ERR, TOK_ERR, POS_ERR, PAR_ERR, ENT_ERR, CPY_ERR};
 
 typedef struct bikeCDT * bikeADT;
 
@@ -33,9 +34,16 @@ bikeADT new(void);
 
 void freeADT(bikeADT bike);
 
-//Agrega una bici al TAD.
+//devuelve el valor de la flag que indica tipo de errores detectados
 
-void putBikes(bikeADT bike, size_t startedId, size_t endedId, size_t * flagError);
+size_t getErrorFlag(bikeADT bike);
+
+//imprime el error segun corresponda.
+void errorReturn(bikeADT bike);
+
+// Agrega una bici al TAD.
+
+void putBikes(bikeADT bike, size_t startedId, size_t endedId, size_t *flagError);
 
 //Agrega una estacion al TAD.
 

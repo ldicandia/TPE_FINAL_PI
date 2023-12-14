@@ -6,6 +6,7 @@
 #include <time.h>
 #include <ctype.h>
 #define SEMICOLONS 4
+#define DATE_SIZE 16
 
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect);
@@ -20,8 +21,7 @@ void query5(bikeADT bike);
 
 FILE *newFile(const char *inputFile);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     size_t formatDetect;
     size_t yearFrom = 0, yearTo = 0;
 
@@ -45,17 +45,37 @@ int main(int argc, char *argv[])
     }
     else{
         fprintf(stderr, "Invalid arguments order\n");
-        exit(ARG_ERR);
+        exit(1);
     }
     if (bike == NULL){
         fprintf(stderr, "Memory error");
         exit(MEMO_ERR);
     }
+
     query1(bike);
+    
+    if(getErrorFlag(bike) != 0)
+        errorReturn(bike);
+
     query2(bike);
+
+    if(getErrorFlag(bike) != 0)
+        errorReturn(bike);
+
     query3(bike);
+
+    if(getErrorFlag(bike) != 0)
+        errorReturn(bike);
+    
     query4(bike);
+
+    if(getErrorFlag(bike) != 0)
+        errorReturn(bike);
+    
     query5(bike);
+
+    if(getErrorFlag(bike) != 0)
+        errorReturn(bike);
 
     freeADT(bike);
     free(bike);
@@ -107,67 +127,47 @@ void query1(bikeADT bike)
 
 void query2(bikeADT bike){
 
-    /* sortAlpha(bike);
-
-        FILE * query2File = newFile("Query2.csv");
-        if(query2File==NULL){
-            fprintf(stderr,"Error al crear archivo Query2\n");
-            exit(CRERR);
-        }
-
-        fputs("stationName;oldestRoute;oldestDateTime\n", query2File);
-        htmlTable table= newTable("Query2.html", 3, "Station Name", "Oldest Route", "Oldest Date Time");
-
-        char * station_name;
-        char * station_end;
-        char * oldest_date;
-
-        for(int i = 0; i < getRealDim(bike); i++) {
-            char * station_name = getStationName(bike, i);
-            char * station_end = getOldestName(bike, i);
-            char * oldest_date = getOldestDateTime(bike, i);
-
-            fprintf(query2File, "%s;%s;%s", station_name, station_end, oldest_date);
-
-            addHTMLRow(table, station_name, station_end, oldest_date);
-            free(station_name);
-            free(station_end);
-            free(oldest_date);
-            }
-
-        fclose(query2File);
-        closeHTMLTable(table);
-        }
-
-*/
-
-    char *station_name;
-    char *station_end;
-    char *oldest_date;
     sortAlpha(bike);
-    FILE *file = newFile("query2.html");
-    if (file == NULL)
-    {
-        fprintf(stderr, "Error creating file");
+
+    FILE * query2File = newFile("Query2.csv");
+    if(query2File==NULL){
+        fprintf(stderr,"Error al crear archivo Query2\n");
         exit(CREA_ERR);
     }
-    
-    fprintf(file, "<!DOCTYPE html>\n<html>\n<head>\n<title>Query 2</title>\n</head>\n<body>\n");
-    fprintf(file, "<table border=\"1\">\n");
-    fprintf(file, "<tr>\n<th>Station Name</th>\n<th>Oldest Route</th>\n<th>Oldest Date Time</th>\n</tr>\n");
-    for (size_t i = 0; i < getRealDim(bike); i++)
-    {
+
+    fputs("stationName;oldestRoute;oldestDateTime\n", query2File);
+    htmlTable table= newTable("Query2.html", 3, "Station Name", "Oldest Route", "Oldest Date Time");
+
+    char * station_name;
+    char * station_end;
+    char * oldest_date;
+
+
+   
+   // DD/MM/YYYY HH:mm:ss
+
+    for(int i = 0; i < getRealDim(bike); i++) {
         station_name = getStationName(bike, i);
         station_end = getOldestName(bike, i);
         oldest_date = getOldestDateTime(bike, i);
-        fprintf(file, "<tr>\n<td>%s</td>\n<td>%s</td>\n<td>%s</td>\n</tr>\n", station_name, station_end, oldest_date);
+
+        char * aux = malloc(DATE_SIZE+1);
+        aux = strncpy(aux, oldest_date, DATE_SIZE);
+        aux[DATE_SIZE] = 0;
+
+        fprintf(query2File, "%s;%s;%s", station_name, station_end, aux);
+
+        addHTMLRow(table, station_name, station_end, aux);
         free(station_name);
         free(station_end);
         free(oldest_date);
+        free(aux);
     }
-    fprintf(file, "</table>\n</body>\n</html>");
-    fclose(file);
+
+    fclose(query2File);
+    closeHTMLTable(table);
 }
+
 
 void query3(bikeADT bike){
 
@@ -245,7 +245,10 @@ void query4(bikeADT bike){
 
     for(size_t i = 0; i < getRealDim(bike); i++){
         station_name = getStationName(bike, i);
-        mostPopularEnd= getMostPopRouteEndStation(bike, i);
+        mostPopularEnd = getMostPopRouteEndStation(bike, i);
+        if(mostPopularEnd == NULL){
+            exit(TOK_ERR);
+        }
         mostPopularTrips = getMostPopRouteTrips(bike, i);
 
         sprintf(auxMostPopularTrips, "%zu", mostPopularTrips);
@@ -262,17 +265,6 @@ void query4(bikeADT bike){
 }
 
 
-/* query 5 debe imprimir un html de la siguiente forma llamando a la funcion getCircularName
-Salida de ejemplo para montreal: 
-
-month;loopsTop1St;loopsTop2St;loopsTop3St
-January;Empty;Empty;Empty
-February;Empty;Empty;Empty
-
-November;Crescent / de Maisonneuve;de la Commune / St-Sulpice;Parc Jean-Drapeau (Chemin Macdonald)
-December;Empty;Empty;Empty
-*/
-
 void query5(bikeADT bike){
     
     FILE *query5File = newFile("Query5.csv");
@@ -284,36 +276,20 @@ void query5(bikeADT bike){
     htmlTable table = newTable("Query5.html", 4, "Month", "LoopsTop1St", "LoopsTop2St", "LoopsTop3St");
 
     char * station_name1;
-    char * month;
+    char * month = NULL;
 
     for (size_t i = 0; i < MONTH ; i++){
         month = getMonthOfTheYear(i);
 
-        /*
-        station_name1 = getCircularName(bike, i, 0);
-        if(station_name1 == NULL){
-            station_name1 = "";
-        }
-        station_name2 = getCircularName(bike, i, 1);
-        if(station_name2 == NULL){
-            station_name2 = "";
-        }
-        station_name3 = getCircularName(bike, i, 2);
-        if(station_name3 == NULL){
-            station_name3 = "";
-        }
-
-        fprintf(query5File, "%s;%s;%s;%s\n", month, station_name1, station_name2, station_name3);
-        addHTMLRow(table, month, station_name1, station_name2, station_name3);
-        */
-
-        char * vec[3];
+        char * vec[NAME_DISPLAY] = {NULL};
+        int flag[NAME_DISPLAY] = {0};
 
         fprintf(query5File, "%s;", month);
         for(size_t j = 0 ; j < getDimMonthStations(bike, i) ; j++){
                 station_name1 = getCircularName(bike, i, j);
                 if(station_name1 != NULL){
                     vec[j] = copyStr(station_name1);
+                    flag[j]++;
                     fprintf(query5File, "%s;",station_name1);
                 }else{
                     vec[j] = "";
@@ -321,12 +297,20 @@ void query5(bikeADT bike){
                 }
                 free(station_name1);
         }
+        if(!getDimMonthStations(bike, i)){
+            for(int i = 0 ; i < NAME_DISPLAY ; i++){
+                vec[i] = "";
+            }
+        }
 
         addHTMLRow(table, month, vec[0], vec[1], vec[2]);
         fprintf(query5File, "\n");
 
-        //free(station_name1);
-        //free(month);
+        for(int i = 0 ; i < NAME_DISPLAY ; i++){
+            if(flag[i]){
+                free(vec[i]);
+            }
+        }
     }
     fclose(query5File);
     closeHTMLTable(table); 
@@ -497,4 +481,37 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
 FILE *newFile(const char *inputFile){
     FILE *new = fopen(inputFile, "wt");
     return new;
+}
+
+void errorReturn(bikeADT bike){
+    switch(getErrorFlag(bike)){
+        case ARG_ERR:
+            printf("Error en la cantidad de argumentos.\n");
+            break;
+        case OPEN_ERR:
+            printf("Error al abrir archivo.\n");
+            break;
+        case CREA_ERR:
+            printf("Error al crear archivo");
+            break;
+        case MEMO_ERR:
+            printf("Error al crear memoria.\n");
+            break;
+        case TOK_ERR:
+            printf("Error de lectura.\n");
+            break;
+        case POS_ERR:
+            printf("Error de acceso: Posicion > Dimension.\n");
+            break;
+        case PAR_ERR:
+            printf("Error al parsear Linea.\n");
+            break;
+        case ENT_ERR:
+            printf("Error de entrada.\n");
+            break;
+        case CPY_ERR:
+            printf("Error en la funcion strcpy.\n");
+            break;
+    }
+    exit(getErrorFlag(bike));
 }
