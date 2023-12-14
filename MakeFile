@@ -1,10 +1,23 @@
-CC = gcc
-ALL_CFLAGS = -Wall -pedantic -std=c99 -lm -g -fsanitize=address
+COMPILER = gcc
+OUTPUT_FILES = bikeSharingMON bikeSharingNYC
 
-all: main
+FLAGS = -Wall -pedantic -std=c99 -lm -g -fsanitize=address
+OBJECT_FILES = main.o
 
-main: main.c bikes.c
-    $(CC) $(ALL_CFLAGS) -o main.out $^
+all: clean mon nyc
 
-clean: 
-    rm -f main.out
+mon: $(OBJECT_FILES)
+	$(COMPILER) -o bikeSharingMON $(OBJECT_FILES) $(FLAGS)
+
+nyc: $(OBJECT_FILES)
+	$(COMPILER) -o bikeSharingNYC $(OBJECT_FILES) $(FLAGS)
+
+main.o: main.c
+	$(COMPILER) -c main.c $(FLAGS)
+
+bikeSharingADT.o: bikeSharingADT.c
+	$(COMPILER) -c bikeSharingADT.c $(FLAGS)
+
+clean:
+	rm -f $(OUTPUT_FILES) $(OBJECT_FILES)
+	@echo "Makefile: Object files and output files deleted."
