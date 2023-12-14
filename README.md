@@ -26,13 +26,13 @@ make nyc
 ### Ejecucion
 Una vez compilado el programa, para ejecutarlo se debe correr de la siguiente manera.
 ```
-./bikeSharingMON bikesMON.csv stationsMON.csv
+./bikeSharingMON bikesMON.csv stationsMON.csv yearFrom yearTo
 ```
-_Siendo, bikeSharingMON el nombre del ejecutable, bikesMON el .csv que contiene la informacion de rentas para Montreal, y stationsMON la informacion de estaciones que contiene la misma ciudad._
+_Siendo, bikeSharingMON el nombre del ejecutable, bikesMON el .csv que contiene la informacion de rentas para Montreal, stationsMON la informacion de estaciones que contiene la misma ciudad y yearFrom - yearTo los anios que se desea buscar_
 ```
-./bikeSharingNYC bikesNYC.csv stationsNYC.csv
+./bikeSharingNYC bikesNYC.csv stationsNYC.csv yearFrom yearTo
 ```
-_Siendo, bikeSharingNYC el nombre del ejecutable, bikesNYC el .csv que contiene la informacion de rentas para New York City, y stationsNYC la informacion de estaciones que contiene la misma ciudad._
+_Siendo, bikeSharingNYC el nombre del ejecutable, bikesNYC el .csv que contiene la informacion de rentas para New York City, stationsNYC la informacion de estaciones que contiene la misma ciudad y yearFrom - yearTo los anios que se desea buscar_
 
 ## Queries
 
