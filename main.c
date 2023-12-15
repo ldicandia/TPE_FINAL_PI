@@ -153,7 +153,7 @@ void query2(bikeADT bike){
         aux = strncpy(aux, oldest_date, DATE_SIZE);
         aux[DATE_SIZE] = 0;
 
-        fprintf(query2File, "%s;%s;%s", station_name, station_end, aux);
+        fprintf(query2File, "%s;%s;%s\n", station_name, station_end, aux);
 
         addHTMLRow(table, station_name, station_end, aux);
         free(station_name);
