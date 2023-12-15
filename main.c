@@ -141,9 +141,6 @@ void query2(bikeADT bike){
     char * oldest_date;
 
 
-   
-   // DD/MM/YYYY HH:mm:ss
-
     for(int i = 0; i < getRealDim(bike); i++) {
         station_name = getStationName(bike, i);
         station_end = getOldestName(bike, i);
@@ -336,9 +333,6 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         return NULL;
     }
 
-    //*formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0; //NYC 1  - MON 0
-    //size_t flagError = 0;
-
     *formatDetect = FORMAT;
 
     char *startDate;
@@ -394,14 +388,6 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
 
     }
 
-    /*
-    for(int i = 0 ; i < getResv(bike) ; i++){
-        if(getUsed(bike, i)){
-            reallocEachVec(bike, i);
-        }
-    }
-    */
-
     sortMostPopularVec(bike);
     sortCircularVec(bike);
 
@@ -444,7 +430,6 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
         //caso MON
         else{
             char *token = strtok(actualRead, ";");
-            //stationId = atoi(token);
             stationId = strtoul(token, NULL, 10);
 
             token = strtok(NULL, ";");
@@ -467,7 +452,6 @@ void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect){
         if(getUsed(bike, i)){
             addNameToVec(bike, i);
             addNameToOldest(bike, i);
-            //se llama para cada posicion en el vector station donde el used es 1
         }
     }
     for(int i = 0 ; i < MONTH ; i++){

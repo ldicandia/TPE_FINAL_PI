@@ -13,8 +13,6 @@
 #define MENOR(a, b) ((a) < (b) ? (a) : (b))
 #define DATE_SIZE 16
 
-//enum months_{JAN = 0, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC}; 
-//enum days_{LUN = 0, MAR, MIE, JUE, VIE, SAB, DOM};
 
  //query 2
 typedef struct oldest{ 
