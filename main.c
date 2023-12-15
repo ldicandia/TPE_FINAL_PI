@@ -8,6 +8,12 @@
 #define SEMICOLONS 4
 #define DATE_SIZE 16
 
+#ifdef NYC
+    #define FORMAT 1
+#else
+    #define FORMAT 0
+#endif
+
 
 void nameReader(bikeADT bike, const char *inputFile, size_t *formatDetect);
 
@@ -330,8 +336,10 @@ bikeADT csvReader(const char *inputFile, size_t yearFrom, size_t yearTo, size_t 
         return NULL;
     }
 
-    *formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0; //NYC 1  - MON 0
+    //*formatDetect = (strstr(actualRead, "started_at") != NULL) ? 1 : 0; //NYC 1  - MON 0
     //size_t flagError = 0;
+
+    *formatDetect = FORMAT;
 
     char *startDate;
     size_t startId;
