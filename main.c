@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ctype.h>
-#define SEMICOLONS 4
 #define DATE_SIZE 16
 
 #ifdef NYC
@@ -76,7 +75,6 @@ int main(int argc, char *argv[]){
         errorReturn(bike);
 
     freeADT(bike);
-    free(bike);
 
     return 0;
 }

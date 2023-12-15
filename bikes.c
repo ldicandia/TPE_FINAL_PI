@@ -22,7 +22,6 @@ typedef struct oldest{
 }TOldest;
 
 //query 4//
-
 typedef struct vecpopular{
     char * endStation;
     size_t endStationId; 
@@ -44,7 +43,6 @@ typedef struct vecStation{
     TOldest oldest;
     
     //query 4
-
     TVecPopular * most_vec;
     size_t dim_most; 
     size_t resv_most;
@@ -61,7 +59,6 @@ typedef struct q3{
 }TQuery3;
 
 //query 5
-
 typedef struct stations{
     char * nameStation;
     size_t circularTrips; 
@@ -90,6 +87,8 @@ typedef struct bikeCDT{
 size_t getErrorFlag(bikeADT bike){
     return bike->errorFlag;
 }
+
+
 
 bikeADT string_cpy(bikeADT bike, char *from, size_t stationId) {
     if (bike == NULL || from == NULL) {
@@ -127,10 +126,6 @@ static int getDay(const char *dateString){
     return localTimeStruct->tm_wday; 
 }
 
-
-
-
-
 size_t getMonth(char *startDate, char *endDate){
     size_t month1;
     size_t month2;
@@ -151,7 +146,6 @@ size_t getMonth(char *startDate, char *endDate){
     return -1;
 }
 
-
 static int compare(const void *a, const void *b){
     TVecStation *station1 = (TVecStation *)a;
     TVecStation *station2 = (TVecStation *)b;
@@ -170,7 +164,6 @@ static int compare(const void *a, const void *b){
 static int compare_stationData(const void *a, const void *b) {
     TVecStation *dataA = (TVecStation *)a;
     TVecStation *dataB = (TVecStation *)b;
-
     return _strcasecmp(dataA->nameStation, dataB->nameStation); 
 }
 
@@ -181,9 +174,7 @@ char * copyStr(const char * s) {
     char * res = malloc(strlen(s)+1);
     if (res == NULL) 
         return NULL;
-
     strcpy(res, s);
-    
     return res;
 }
 
@@ -223,12 +214,9 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
             bike->station[i].oldest.oldestDateTime = NULL;
             bike->station[i].oldest.oldestEndStation = NULL;
             bike->station[i].used = 0;
-
             bike->station[i].most_vec = NULL;
             bike->station[i].dim_most = 0;
             bike->station[i].resv_most = 0;
-
-            
             for(int j = 0; j < WEEKS ; j++){
                 bike->qtyPerDay[j].endedTrips = 0;
                 bike->qtyPerDay[j].startedTrips = 0;
@@ -236,8 +224,6 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
         }
         bike->resv_station = MAYOR(startId, endId);
     }
-
-    //si no estaa usado, ponemos el id
     if (bike->station[startId-1].used == 0){
         bike->station[startId-1].idStation = startId;
         bike->station[startId-1].used = 1;
@@ -257,12 +243,10 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     strncpy(aux, startDate, MAX_DATE);
     aux[MAX_DATE] = 0;
     size_t start = getDay(aux);
-
     char aux2[MAX_DATE + 1];
     strncpy(aux2, endDate, MAX_DATE);
     aux2[MAX_DATE] = 0;
     size_t end = getDay(aux2); 
-
     bike->qtyPerDay[start].startedTrips++;  
     bike->qtyPerDay[end].endedTrips++;
 
@@ -284,7 +268,6 @@ void putStation(bikeADT bike, char startDate[], size_t startId, char endDate[], 
     addVecq5(bike, endId, startId, startDate, endDate);
 
 }
-
 
 size_t getRealDim(bikeADT bike){
     return bike->dim_station;
@@ -351,39 +334,30 @@ void tripSort(bikeADT bike){
             bike->station[k].memberTrips = bike->station[i].memberTrips;
             bike->station[k].allTrips = bike->station[i].allTrips;
             bike->station[k].casualTrips = bike->station[i].casualTrips;
-
             bike->station[k].oldest.oldestDateTime = copyStr(bike->station[i].oldest.oldestDateTime);
             free(bike->station[i].oldest.oldestDateTime);
-
             bike->station[k].oldest.oldestEndStation = copyStr(bike->station[i].oldest.oldestEndStation);
             free(bike->station[i].oldest.oldestEndStation);
-
             bike->station[k].oldest.oldestStationId = bike->station[i].oldest.oldestStationId;
-
             bike->station[k].dim_most = bike->station[i].dim_most;
             bike->station[k].most_vec = realloc(bike->station[k].most_vec, 1*sizeof(TVecPopular));
             bike->station[k].most_vec[0].endStation = NULL;
             bike->station[k].most_vec[0].endStation = copyStr(bike->station[i].most_vec[0].endStation);
             bike->station[k].most_vec[0].endStationId = bike->station[i].most_vec[0].endStationId;
             bike->station[k].most_vec[0].endStationTrips = bike->station[i].most_vec[0].endStationTrips;
-           
             if(i > bike->dim_station){
                 free(bike->station[i].most_vec[0].endStation);
                 free(bike->station[i].most_vec);
             }    
-
             bike->station[k].idStation = i+1;
             bike->station[k++].used = 1;
         }
         bike->station[i].used = 0;
     }
-    
-
     bike->station = realloc(bike->station, k*sizeof(TVecStation)); 
     bike->dim_station = bike->resv_station = k;
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare);
 }
-
 
 /*-----------------------------------query 2---------------------------------------------------*/
 
@@ -409,11 +383,9 @@ char * getOldestDateTime(bikeADT bike, size_t pos){
     if(bike->dim_station < pos){
         bike->errorFlag = POS_ERR;
     }
-
     if(bike->station[pos].nameStation == NULL){
         bike->errorFlag = TOK_ERR;
     }
-        
     return copyStr(bike->station[pos].oldest.oldestDateTime);
 }
 
@@ -503,8 +475,6 @@ void addNameToVec(bikeADT bike, size_t pos){
     if(bike->resv_station < pos){
         bike->errorFlag = POS_ERR;
     }
-    
-
     if(!bike->station[pos].dim_most){
         return;
     }else{
@@ -524,8 +494,6 @@ void addNameToOldest(bikeADT bike, size_t pos){
     bike->station[pos].oldest.oldestEndStation = copyStr(bike->station[bike->station[pos].oldest.oldestStationId-1].nameStation);
 }
 
-
-
 size_t getMostPopRouteTrips(bikeADT bike, size_t pos){ 
     if(bike->dim_station < pos){
         bike->errorFlag = POS_ERR;
@@ -537,21 +505,17 @@ char * getMostPopRouteEndStation(bikeADT bike, size_t pos){
     if(bike->dim_station < pos){
         bike->errorFlag = POS_ERR;
     }
-
     if(bike->station[pos].most_vec[0].endStation == NULL){
         return NULL;
     }
-
     return copyStr(bike->station[pos].most_vec[0].endStation);
 }
-
 
 void sortAlpha(bikeADT bike){
     qsort(bike->station, bike->dim_station, sizeof(TVecStation), compare_stationData);
 }
 
 /*---------------------------------------query 5------------------------------------------------------*/
-
 
 void addVecq5(bikeADT bike, size_t endId, size_t startId, char * startDate, char * endDate){
     int c = getMonth(startDate, endDate); 
@@ -594,9 +558,7 @@ void addNameToVecQ5(bikeADT bike, size_t pos){
         return;
     }else{
         int aux = MENOR(NAME_DISPLAY, bike->month[pos].dimStat);
-
         bike->month[pos].circularStations = realloc(bike->month[pos].circularStations, aux*sizeof(stations));
-
         for(int i = 0 ; i < aux ; i++){
             if(bike->station[bike->month[pos].circularStations[i].startId-1].nameStation == NULL){
                 bike->errorFlag = TOK_ERR;
@@ -631,14 +593,12 @@ void freeADT(bikeADT bike){
         free(bike->station[i].most_vec[0].endStation);
         free(bike->station[i].most_vec);
     }
-
-    
     for(int i = 0 ; i < MONTH ; i++){
         for(int j = 0 ; j < getDimMonthStations(bike, i)  ; j++){
             free(bike->month[i].circularStations[j].nameStation);
         }
         free(bike->month[i].circularStations);
     }
-    
     free(bike->station);
+    free(bike);
 }
