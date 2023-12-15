@@ -1,5 +1,5 @@
 # 2do CUATRIMESTRE 2023
-## _Primera fecha 09/12_
+## _Segunda Fecha 19/12_
 
 #### AUTORES:
 - _Franco Ferrari 63094_
